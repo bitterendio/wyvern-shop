@@ -12,4 +12,6 @@
  Text Domain:  insane-child
 */
 
-@import '../insane/style.scss';
+@import '_variables.scss';
+
+@import '../wyvern/style.scss';
