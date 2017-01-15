@@ -33,22 +33,22 @@ const App = new Vue({
   },
 
   mounted() {
-    this.updateTitle('');
-    this.trackGA();
+    this.updateTitle('')
+    this.trackGA()
   },
 
   methods: {
     updateTitle(pageTitle) {
-      document.title = (pageTitle ? pageTitle + ' - ' : '') + wp.site_name;
+      document.title = (pageTitle ? pageTitle + ' - ' : '') + wp.site_name
     },
     trackGA() {
       if ( typeof ga == 'function' ) {
-        ga('set', 'page', '/' + window.location.pathname.substr(1));
-        ga('send', 'pageview');
+        ga('set', 'page', '/' + window.location.pathname.substr(1))
+        ga('send', 'pageview')
       }
     },
     toggleVideo(show_video) {
-      this.fullvideo = show_video;
+      this.fullvideo = show_video
     }
   },
 
@@ -56,7 +56,6 @@ const App = new Vue({
   created: function () {
     window.eventHub.$on('page-title', this.updateTitle)
     window.eventHub.$on('track-ga', this.trackGA)
-    window.eventHub.$on('toggle-video', this.toggleVideo)
   },
 
   // It's good to clean up event listeners before
@@ -64,17 +63,12 @@ const App = new Vue({
   beforeDestroy: function () {
     window.eventHub.$off('page-title', this.updateTitle)
     window.eventHub.$off('track-ga', this.trackGA)
-    window.eventHub.$off('toggle-video', this.toggleVideo)
   },
 
   watch: {
     // Changed route
     '$route' (to, from) {
       window.eventHub.$emit('changed-route')
-
-      this.fullvideo = false;
-      this.fullscreen = false;
-      this.show_search = false;
 
       console.log('Changed route', to, from);
     }
