@@ -1,11 +1,18 @@
 # wyvern-child
 
+- [Installation](#installation)
 - [Routes](#routes)
   - [Override routes in child theme](#routes-override)
 - [Page templates](#templates)
   - [Override page templates in child theme](#templates-override)
 - [Development](#development)
     - [Development commands](#development-cmds)
+
+#<a name="installation"></a> Installation
+
+```
+git clone https://github.com/sanatorium/wyvern-child.git
+```
 
 #<a name="routes"></a>Routes
 
