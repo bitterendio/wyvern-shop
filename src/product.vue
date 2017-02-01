@@ -41,14 +41,31 @@
 
   .available_variations {
     list-style-type: none;
-    padding-left: 0;
+    padding-left: 5px;
+    padding-bottom: 5px;
     li {
+      cursor: pointer;
       display: block;
       padding: 5px 10px;
       margin-bottom: 5px;
       border: 1px solid #ccc;
       &.active, &:hover {
         border: 1px solid #444;
+      }
+      &.attribute_pa_velikost {
+        float: left;
+        display: block;
+        margin: 10px 10px -5px -5px;
+        background-color: #999;
+        border: 1px solid #999;
+        color: #fff;
+        .variation__attribute__label {
+          display: none;
+        }
+        &.active, &:hover {
+          border: 1px solid #444;
+          background-color: #444;
+        }
       }
     }
   }
@@ -105,8 +122,8 @@
             </ladda>
 
             <ol class="available_variations">
-              <li v-for="variation in product.available_variations" v-if="variation.variation_is_active && variation.variation_is_visible" @click="selectVariation(variation)" :class="{ 'active' : variation.variation_id == selected_variation }">
-                <span v-for="(value, key) in variation.attributes" :class="key">
+              <li v-for="variation in product.available_variations" v-if="variation.variation_is_active && variation.variation_is_visible" @click="selectVariation(variation)" :class="[{ 'active' : variation.variation_id == selected_variation }, getAttributeClass(variation.attributes) ]">
+                <span v-for="(value, key) in variation.attributes" :class="[ key + '__item' ]">
                   <span class="variation__attribute__label">{{ getAttributeByKey(key) }}</span>
                   <span class="variation__attribute__value">{{ value }}</span>
                 </span>
@@ -138,6 +155,15 @@
       window.wyvern.http.get(wp.root + 'api/products/' + vm.$route.meta.postId).then((response) => {
         vm.product = response.data
         vm.product_gallery_preview = vm.product.images.large[0]
+
+        vm.product.available_variations.forEach((variation) => {
+          for ( let key in variation.attributes ) {
+            let attribute = variation.attributes[key]
+            if ( attribute == vm.product.default_attributes_variation[vm.getAttributeSlugByKey(key)] ) {
+              vm.selectVariation(variation)
+            }
+          }
+        })
       })
     },
 
@@ -198,6 +224,12 @@
       getAttributeByKey(key) {
         let attribute_key = key.replace('attribute_pa_', '')
         return this.wp.attributes[attribute_key].label
+      },
+      getAttributeSlugByKey(key) {
+        return key.replace('attribute_pa_', '')
+      },
+      getAttributeClass(attributes) {
+        return Object.keys(attributes).join(' variations__')
       }
     },
 
