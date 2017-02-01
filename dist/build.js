@@ -17169,6 +17169,9 @@ var querystring = __webpack_require__(154);
       window.eventHub.$emit('track-ga');
     });
 
+    vm.payment = vm.wp.wc_selected.payment_method;
+    if (typeof vm.wp.wc_selected.shipping_methods[0] !== 'undefined') vm.shipping = vm.wp.wc_selected.shipping_methods[0];
+
     this.updateCart();
   },
   data: function data() {
@@ -17219,7 +17222,8 @@ var querystring = __webpack_require__(154);
 
       var params = querystring.stringify({
         'shipping_total': vm.shipping_total,
-        'shipping': vm.shipping
+        'shipping': vm.shipping,
+        'payment': vm.payment
       });
 
       window.wyvern.http.get(wp.root + 'api/cart/?' + params).then(function (response) {
@@ -17291,9 +17295,15 @@ var querystring = __webpack_require__(154);
     isShippingChanged: function isShippingChanged(property, value) {
       if (property === 'shipping') this.shippingChanged(value);
     },
+    isPaymentChanged: function isPaymentChanged(property, value) {
+      if (property === 'payment') this.paymentChanged(value);
+    },
     shippingChanged: function shippingChanged(value) {
       if (typeof value.cost !== 'undefined') this.shipping_total = value.cost;
 
+      this.updateCart();
+    },
+    paymentChanged: function paymentChanged(value) {
       this.updateCart();
     },
     selectShipping: function selectShipping(shipping) {
@@ -17311,6 +17321,7 @@ var querystring = __webpack_require__(154);
 
   created: function created() {
     window.eventHub.$on('selected', this.isShippingChanged);
+    window.eventHub.$on('selected', this.isPaymentChanged);
   },
   beforeDestroy: function beforeDestroy() {
     window.eventHub.$off('selected');

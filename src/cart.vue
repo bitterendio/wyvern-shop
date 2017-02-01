@@ -181,6 +181,10 @@
         window.eventHub.$emit('track-ga')
       })
 
+      vm.payment = vm.wp.wc_selected.payment_method
+      if ( typeof vm.wp.wc_selected.shipping_methods[0] !== 'undefined' )
+        vm.shipping = vm.wp.wc_selected.shipping_methods[0]
+
       this.updateCart()
     },
 
@@ -231,7 +235,8 @@
 
         let params = querystring.stringify({
           'shipping_total' : vm.shipping_total,
-          'shipping' : vm.shipping
+          'shipping' : vm.shipping,
+          'payment' : vm.payment,
         })
 
         window.wyvern.http.get(wp.root + 'api/cart/?' + params).then((response) => {
@@ -301,10 +306,17 @@
         if ( property === 'shipping' )
           this.shippingChanged(value)
       },
+      isPaymentChanged(property, value) {
+        if ( property === 'payment' )
+          this.paymentChanged(value)
+      },
       shippingChanged(value) {
         if ( typeof value.cost !== 'undefined' )
           this.shipping_total = value.cost
 
+        this.updateCart()
+      },
+      paymentChanged(value) {
         this.updateCart()
       },
       selectShipping(shipping) {
@@ -322,6 +334,7 @@
 
     created() {
       window.eventHub.$on('selected', this.isShippingChanged)
+      window.eventHub.$on('selected', this.isPaymentChanged)
     },
 
     beforeDestroy() {
