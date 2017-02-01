@@ -18074,6 +18074,8 @@ var querystring = __webpack_require__(154);
         variation[this.getAttributeByKey(key)] = item;
       }
 
+      if (typeof selected_variation.image_src !== 'undefined' && selected_variation.image_src !== '') this.showGallery(selected_variation.image_src);
+
       this.variation = variation;
     },
     getAttributeByKey: function getAttributeByKey(key) {

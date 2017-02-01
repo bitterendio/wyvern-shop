@@ -164,7 +164,6 @@
         let vm = this
             this.added = false
 
-
         let query = querystring.stringify({
           'variation_id' : this.selected_variation,
           'quantity' : this.quantity,
@@ -190,6 +189,9 @@
           let item = selected_variation.attributes[key]
           variation[this.getAttributeByKey(key)] = item
         }
+
+        if ( typeof selected_variation.image_src !== 'undefined' && selected_variation.image_src !== '' )
+          this.showGallery(selected_variation.image_src)
 
         this.variation = variation
       },
