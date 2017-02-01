@@ -17152,6 +17152,11 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
 
 var querystring = __webpack_require__(154);
 
@@ -20820,7 +20825,16 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
           _vm.$forceUpdate()
         }
       }
-    })]), _vm._v(" "), _c('td', {
+    })]), _vm._v(" "), _c('td', [_c('button', {
+      attrs: {
+        "type": "button"
+      },
+      on: {
+        "click": function($event) {
+          _vm.updateQuantity(key, 0)
+        }
+      }
+    }, [_vm._v("\n                    ODEBRAT\n                  ")])]), _vm._v(" "), _c('td', {
       staticClass: "item__row__total"
     }, [_vm._v("\n                  " + _vm._s(_vm.price(item.line_total)) + "\n                ")])])
   })), _vm._v(" "), _c('tfoot', [_c('tr', {
@@ -20832,7 +20846,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
   }, [_vm._v("\n                  Zboží celkem\n                ")]), _vm._v(" "), _c('td', {
     staticClass: "text-right",
     attrs: {
-      "colspan": "2"
+      "colspan": "3"
     }
   }, [_vm._v("\n                  " + _vm._s(_vm.price(_vm.cart.subtotal)) + "\n                ")])]), _vm._v(" "), _c('tr', {
     staticClass: "totals__delivery"
@@ -20843,7 +20857,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
   }, [_vm._v("\n                  Doprava\n                ")]), _vm._v(" "), _c('td', {
     staticClass: "text-right",
     attrs: {
-      "colspan": "2"
+      "colspan": "3"
     }
   }, [_vm._v("\n                  " + _vm._s(_vm.price(_vm.cart.shipping_total)) + "\n                ")])]), _vm._v(" "), _c('tr', {
     staticClass: "totals__total"
@@ -20854,7 +20868,7 @@ module.exports={render:function (){var _vm=this;var _h=_vm.$createElement;var _c
   }, [_vm._v("\n                  Cena celkem\n                ")]), _vm._v(" "), _c('td', {
     staticClass: "text-right",
     attrs: {
-      "colspan": "2"
+      "colspan": "3"
     }
   }, [_vm._v("\n                  " + _vm._s(_vm.price(_vm.cart.total)) + "\n                ")])])])], 1) : _vm._e(), _vm._v(" "), _c('button', {
     attrs: {

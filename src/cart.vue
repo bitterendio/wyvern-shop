@@ -64,6 +64,11 @@
                   <td class="item__row__quantity">
                     <input type="number" v-model="item.quantity" @change="updateQuantity(key, item.quantity)">
                   </td>
+                  <td>
+                    <button type="button" @click="updateQuantity(key, 0)">
+                      ODEBRAT
+                    </button>
+                  </td>
                   <td class="item__row__total">
                     {{ price(item.line_total) }}
                   </td>
@@ -74,7 +79,7 @@
                   <td colspan="2">
                     Zboží celkem
                   </td>
-                  <td colspan="2" class="text-right">
+                  <td colspan="3" class="text-right">
                     {{ price(cart.subtotal) }}
                   </td>
                 </tr>
@@ -82,7 +87,7 @@
                   <td colspan="2">
                     Doprava
                   </td>
-                  <td colspan="2" class="text-right">
+                  <td colspan="3" class="text-right">
                     {{ price(cart.shipping_total) }}
                   </td>
                 </tr>
@@ -90,7 +95,7 @@
                   <td colspan="2">
                     Cena celkem
                   </td>
-                  <td colspan="2" class="text-right">
+                  <td colspan="3" class="text-right">
                     {{ price(cart.total) }}
                   </td>
                 </tr>
