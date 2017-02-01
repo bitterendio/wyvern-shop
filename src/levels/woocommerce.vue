@@ -120,6 +120,8 @@
 </template>
 
 <script>
+  var jQuery = require('jquery')
+
   export default {
 
     props: ['level'],
