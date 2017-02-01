@@ -54,16 +54,47 @@
                   </td>
                   <td class="item__row__info">
                     <h3 class="product__title">{{ item.data.post.post_title }}</h3>
-                    <p class="product_description">Lorem ipsum dolor</p>
+                    <p class="product_description">
+                      <span v-for="(value, label) in item.variation">
+                        <span class="product__variation__label">{{ label }}</span>
+                        <span class="product__variation__value">{{ value }}</span>
+                      </span>
+                    </p>
                   </td>
                   <td class="item__row__quantity">
                     <input type="number" v-model="item.quantity" @change="updateQuantity(key, item.quantity)">
                   </td>
                   <td class="item__row__total">
-                    {{ item.line_total }} Kč
+                    {{ price(item.line_total) }}
                   </td>
                 </tr>
               </tbody>
+              <tfoot>
+                <tr class="totals__subtotal">
+                  <td colspan="2">
+                    Zboží celkem
+                  </td>
+                  <td colspan="2" class="text-right">
+                    {{ price(cart.subtotal) }}
+                  </td>
+                </tr>
+                <tr class="totals__delivery">
+                  <td colspan="2">
+                    Doprava
+                  </td>
+                  <td colspan="2" class="text-right">
+                    {{ price(cart.shipping_total) }}
+                  </td>
+                </tr>
+                <tr class="totals__total">
+                  <td colspan="2">
+                    Cena celkem
+                  </td>
+                  <td colspan="2" class="text-right">
+                    {{ price(cart.total) }}
+                  </td>
+                </tr>
+              </tfoot>
             </table>
 
             <button type="button" @click="emptyCart()">
@@ -107,11 +138,11 @@
             <div class="form-group order__selection shipping__selection">
               <label class="control-label">Doprava</label>
               <div class="order_selection_options">
-                <div class="order__option shipping__option" v-for="shipping in wp.shipping" :class="{ 'active' : isSelected('shipping', shipping.id) }" @click="select('shipping', shipping.id)">
+                <div class="order__option shipping__option" v-for="shipping in wp.shipping" :class="{ 'active' : isSelected('shipping', shipping.id) }" @click="selectShipping(shipping)">
                   <code class="order__option__code">{{ shipping.id }}</code>
                   <h4 class="order__option__title">{{ shipping.title }}</h4>
                   <p  class="order__option__description">{{ shipping.description }}</p>
-                  <span>{{ shipping.cost }}</span>
+                  <span>{{ price(shipping.cost) }}</span>
                 </div>
               </div>
             </div>
@@ -139,25 +170,13 @@
   export default {
     mounted() {
       var vm = this;
-      console.log(wp.gateways)
       this.getPage(function(data){
         vm.page = data
         window.eventHub.$emit('page-title', vm.page.title.rendered)
         window.eventHub.$emit('track-ga')
       })
 
-      window.wyvern.http.get(wp.root + 'api/cart/').then((response) => {
-        vm.cart = response.data
-
-        // Set images for all items
-        for( let key in vm.cart.cart_contents ) {
-          let item = vm.cart.cart_contents[key]
-
-          window.wyvern.http.get(wp.root + 'api/thumbnails/' + item.data.post.ID).then((response) => {
-            vm.$set(vm.cart.cart_contents[key], 'thumbnail', response.data)
-          })
-        }
-      })
+      this.updateCart()
     },
 
     data() {
@@ -173,6 +192,7 @@
         cart: {},
         payment: null,
         shipping: null,
+        shipping_total: 0,
         address: {
           billing : {
             'name'   : '',
@@ -199,6 +219,27 @@
           vm.cart = {}
 
           window.eventHub.$emit('empty-cart')
+        })
+      },
+      updateCart() {
+        let vm = this
+
+        let params = querystring.stringify({
+          'shipping_total' : vm.shipping_total,
+          'shipping' : vm.shipping
+        })
+
+        window.wyvern.http.get(wp.root + 'api/cart/?' + params).then((response) => {
+          vm.cart = response.data
+
+          // Set images for all items
+          for( let key in vm.cart.cart_contents ) {
+            let item = vm.cart.cart_contents[key]
+
+            window.wyvern.http.get(wp.root + 'api/thumbnails/' + item.data.post.ID).then((response) => {
+              vm.$set(vm.cart.cart_contents[key], 'thumbnail', response.data)
+            })
+          }
         })
       },
       updateQuantity(id, quantity) {
@@ -251,12 +292,35 @@
           window.location.href = response.data.redirect
         })
       },
+      isShippingChanged(property, value) {
+        if ( property === 'shipping' )
+          this.shippingChanged(value)
+      },
+      shippingChanged(value) {
+        if ( typeof value.cost !== 'undefined' )
+          this.shipping_total = value.cost
+
+        this.updateCart()
+      },
+      selectShipping(shipping) {
+        this.shipping = shipping.id
+        window.eventHub.$emit('selected', 'shipping', shipping)
+      },
       select(property, value) {
         this[property] = value
+        window.eventHub.$emit('selected', property, value)
       },
       isSelected(property, value) {
         return this[property] == value
       }
+    },
+
+    created() {
+      window.eventHub.$on('selected', this.isShippingChanged)
+    },
+
+    beforeDestroy() {
+      window.eventHub.$off('selected')
     },
 
     route: {

@@ -38,6 +38,20 @@
       border-color: $hover-color;
     }
   }
+
+  .available_variations {
+    list-style-type: none;
+    padding-left: 0;
+    li {
+      display: block;
+      padding: 5px 10px;
+      margin-bottom: 5px;
+      border: 1px solid #ccc;
+      &.active, &:hover {
+        border: 1px solid #444;
+      }
+    }
+  }
 </style>
 
 <template>
@@ -90,6 +104,15 @@
               Add to cart
             </ladda>
 
+            <ol class="available_variations">
+              <li v-for="variation in product.available_variations" v-if="variation.variation_is_active && variation.variation_is_visible" @click="selectVariation(variation)" :class="{ 'active' : variation.variation_id == selected_variation }">
+                <span v-for="(value, key) in variation.attributes" :class="key">
+                  <span class="variation__attribute__label">{{ getAttributeByKey(key) }}</span>
+                  <span class="variation__attribute__value">{{ value }}</span>
+                </span>
+              </li>
+            </ol>
+
           </div>
 
         </div>
@@ -107,6 +130,7 @@
 </template>
 
 <script>
+  var querystring = require('querystring')
 
   export default {
     mounted() {
@@ -124,8 +148,11 @@
         },
         product_gallery_preview: null,
         lang: wp.lang,
-        amount: 1,
-        added: false
+        quantity: 1,
+        added: false,
+        wp: window.wp,
+        selected_variation: null,
+        variation: null
       }
     },
 
@@ -137,14 +164,38 @@
         let vm = this
             this.added = false
 
-        window.wyvern.http.post(wp.root + 'api/cart/' + product.id).then((response) => {
-          window.eventHub.$emit('cart-add', vm.amount)
-          window.eventHub.$omit('message', {
+
+        let query = querystring.stringify({
+          'variation_id' : this.selected_variation,
+          'quantity' : this.quantity,
+          'variation' : JSON.stringify(this.variation)
+        })
+
+        window.wyvern.http.post(wp.root + 'api/cart/' + product.id + '/?' + query).then((response) => {
+          window.eventHub.$emit('cart-add', vm.quantity)
+          window.eventHub.$emit('message', {
             type: 'success',
-            message: 'Zbozi bylo uspesne pridano do kosiku'
+            message: 'Zboží bylo úspěšně přidáno do košíku'
           })
           this.added = true
         })
+      },
+      selectVariation(selected_variation) {
+        this.selected_variation = selected_variation.variation_id
+
+        let variation = {}
+
+        for ( var key in selected_variation.attributes )
+        {
+          let item = selected_variation.attributes[key]
+          variation[this.getAttributeByKey(key)] = item
+        }
+
+        this.variation = variation
+      },
+      getAttributeByKey(key) {
+        let attribute_key = key.replace('attribute_pa_', '')
+        return this.wp.attributes[attribute_key].label
       }
     },
 

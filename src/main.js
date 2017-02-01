@@ -10,6 +10,20 @@ Vue.component('Page', Page)
 import Cart from './cart.vue'
 Vue.component('Cart', Cart)
 
+import Checkout from './checkout.vue'
+Vue.component('Checkout', Checkout)
+window.wp.templates.push('Checkout')
+
+routes.add({
+  path: wp.base_path + 'checkout/pay/:id/',
+  component: Checkout,
+  meta: {
+    postId: 7,
+    name: 'Checkout',
+    slug: 'checkout',
+  }
+});
+
 import Product from './product.vue'
 Vue.component('Product', Product)
 
@@ -29,6 +43,41 @@ Vue.component('sidebar', Sidebar)
 
 // Import styles
 import './../style.scss'
+
+Number.prototype.formatMoney = function(c, d, t){
+  var n = this,
+      c = isNaN(c = Math.abs(c)) ? 2 : c,
+      d = d == undefined ? "." : d,
+      t = t == undefined ? "," : t,
+      s = n < 0 ? "-" : "",
+      i = String(parseInt(n = Math.abs(Number(n) || 0).toFixed(c))),
+      j = (j = i.length) > 3 ? j % 3 : 0;
+  return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
+};
+
+Vue.mixin({
+  methods: {
+    price(value) {
+      let money = parseFloat(value).formatMoney(window.wp.decimals, window.wp.decimal_separator, window.wp.thousand_separator)
+
+      switch (window.wp.price_format) {
+        case '%2$s %1$s':
+          return money + ' ' + window.wp.currency_symbol
+          break;
+        case '%2$s%1$s':
+          return money + '' + window.wp.currency_symbol
+          break;
+        case '%1$s%2$s':
+          return window.wp.currency_symbol + '' + money
+          break;
+        case '%1$s %2$s':
+        default:
+          return window.wp.currency_symbol + ' ' + money
+          break;
+      }
+    }
+  }
+})
 
 // Create router instance
 var router = new VueRouter({
@@ -117,6 +166,7 @@ const App = new Vue({
     '$route' (to, from) {
       window.eventHub.$emit('changed-route')
       window.eventHub.$emit('filters-changed', {})
+      console.log(to,from)
     }
   }
 });
