@@ -1,0 +1,158 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-02-02 14:16+0000\n"
+"PO-Revision-Date: 2017-02-02 14:17+0000\n"
+"Last-Translator: rozklad <jan.rozklad@gmail.com>\n"
+"Language-Team: English (United States)\n"
+"Language: en-US\n"
+"Plural-Forms: nplurals=2; plural=n != 1\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Loco - https://localise.biz/"
+
+msgid "Add to cart"
+msgstr "Add to cart"
+
+msgid "Empty cart"
+msgstr "Empty cart"
+
+msgid "Add to cart"
+msgstr ""
+
+msgid "Empty cart"
+msgstr ""
+
+msgid "Account: General"
+msgstr ""
+
+msgid "Account: Orders"
+msgstr ""
+
+msgid "First name"
+msgstr ""
+
+msgid "Last name"
+msgstr ""
+
+msgid "Phone"
+msgstr ""
+
+msgid "E-mail"
+msgstr ""
+
+msgid "Address"
+msgstr ""
+
+msgid "Password"
+msgstr ""
+
+msgid "Billing address"
+msgstr ""
+
+msgid "Shipping address"
+msgstr ""
+
+msgid "Notes"
+msgstr ""
+
+msgid "Cancel order"
+msgstr ""
+
+msgid "Account"
+msgstr ""
+
+msgid "Logout"
+msgstr ""
+
+msgid "Sign in"
+msgstr ""
+
+msgid "Sign up"
+msgstr ""
+
+msgid "Sign in with"
+msgstr ""
+
+msgid "Sign up with""or"
+msgstr ""
+
+msgid "Username or E-mail"
+msgstr ""
+
+msgid "Remember me"
+msgstr ""
+
+msgid "Forgot Password"
+msgstr ""
+
+msgid "Reset password"
+msgstr ""
+
+msgid "Create Account"
+msgstr ""
+
+msgid "Remove from cart"
+msgstr ""
+
+msgid "Subtotal"
+msgstr ""
+
+msgid "Shipping total"
+msgstr ""
+
+msgid "Total"
+msgstr ""
+
+msgid "First name and Last name"
+msgstr ""
+
+msgid "Note"
+msgstr ""
+
+msgid "Ship to different address"
+msgstr ""
+
+msgid "Choose payment"
+msgstr ""
+
+msgid "Choose shipping"
+msgstr ""
+
+msgid "Place order"
+msgstr ""
+
+msgid "Search"
+msgstr ""
+
+msgid "Back to catalog"
+msgstr ""
+
+msgid "All"
+msgstr ""
+
+msgid "Account number"
+msgstr ""
+
+msgid "Payment ID"
+msgstr ""
+
+msgid "Bank name"
+msgstr ""
+
+msgid "IBAN"
+msgstr ""
+
+msgid "Swift"
+msgstr ""
+
+msgid "Place for local pickup"
+msgstr ""
+
+msgid "Update"
+msgstr ""
+
+msgid "Go to Admin"
+msgstr ""

@@ -1,0 +1,53 @@
+{
+  "key": "group_insaneacflevels",
+  "title": "Sane Levels",
+  "fields": [
+    {
+      "layouts": [
+        {
+          "key": "5888c2cce8f38",
+          "name": "",
+          "label": "",
+          "display": "block",
+          "sub_fields": [],
+          "min": "",
+          "max": ""
+        }
+      ],
+      "min": "",
+      "max": "",
+      "button_label": "Add Row",
+      "key": "field_insaneflexiblecontent",
+      "parent": "group_insaneacflevels",
+      "label": "Levels",
+      "name": "levels",
+      "type": "flexible_content",
+      "instructions": "",
+      "required": 0,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      }
+    }
+  ],
+  "location": [
+    [
+      {
+        "param": "post_type",
+        "operator": "==",
+        "value": "post"
+      }
+    ]
+  ],
+  "menu_order": 0,
+  "position": "normal",
+  "style": "default",
+  "label_placement": "top",
+  "instruction_placement": "label",
+  "hide_on_screen": "",
+  "active": 1,
+  "description": "",
+  "modified": 1485357776
+}
