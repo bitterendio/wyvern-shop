@@ -14,6 +14,10 @@ import Checkout from './checkout.vue'
 Vue.component('Checkout', Checkout)
 window.wp.templates.push('Checkout')
 
+import Account from './account.vue'
+Vue.component('Account', Account)
+window.wp.templates.push('Account')
+
 routes.add({
   path: wp.base_path + 'checkout/pay/:id/',
   component: Checkout,
@@ -21,6 +25,28 @@ routes.add({
     postId: 7,
     name: 'Checkout',
     slug: 'checkout',
+    action: 'pay'
+  }
+});
+
+routes.add({
+  path: wp.base_path + 'checkout/order-received/:id/',
+  component: Checkout,
+  meta: {
+    postId: 7,
+    name: 'Checkout',
+    slug: 'checkout',
+    action: 'order-received'
+  }
+});
+
+routes.add({
+  path: wp.base_path + 'account',
+  component: Account,
+  meta: {
+    postId: 8,
+    name: 'Account',
+    slug: 'account',
   }
 });
 

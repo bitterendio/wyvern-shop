@@ -43,7 +43,7 @@
             <h1 class="entry-title">{{ page.title.rendered }}</h1>
 
             <table class="table table--cart" v-if="cart.cart_contents">
-              <tbody summary="Nákupní košík">
+              <tbody :summary="page.title.rendered">
                 <tr v-for="(item, key) in cart.cart_contents">
                   <td class="item__row__thumbnail">
                     <img v-if="item.thumbnail"
@@ -66,7 +66,7 @@
                   </td>
                   <td>
                     <button type="button" @click="updateQuantity(key, 0)">
-                      ODEBRAT
+                      {{ lang.remove_from_cart }}
                     </button>
                   </td>
                   <td class="item__row__total">
@@ -77,7 +77,7 @@
               <tfoot>
                 <tr class="totals__subtotal">
                   <td colspan="2">
-                    Zboží celkem
+                    {{ lang.subtotal }}
                   </td>
                   <td colspan="3" class="text-right">
                     {{ price(cart.subtotal) }}
@@ -85,7 +85,7 @@
                 </tr>
                 <tr class="totals__delivery">
                   <td colspan="2">
-                    Doprava
+                    {{ lang.shipping_total }}
                   </td>
                   <td colspan="3" class="text-right">
                     {{ price(cart.shipping_total) }}
@@ -93,7 +93,7 @@
                 </tr>
                 <tr class="totals__total">
                   <td colspan="2">
-                    Cena celkem
+                    {{ lang.total }}
                   </td>
                   <td colspan="3" class="text-right">
                     {{ price(cart.total) }}
@@ -103,7 +103,7 @@
             </table>
 
             <button type="button" @click="emptyCart()">
-              Vyprázdnit košík
+              {{ lang.empty_cart }}
             </button>
 
             <div class="entry-content" v-html="page.content.rendered">
@@ -114,23 +114,44 @@
           <div class="secondary">
 
             <div class="form-group">
-              <input type="text" v-model="address.shipping.name" class="form-control" placeholder="Jméno a příjmení">
+              <input type="text" v-model="billing_address.name" class="form-control" :placeholder="lang.first_name_and_last_name">
             </div>
 
             <div class="form-group">
-              <input type="text" v-model="address.shipping.phone" class="form-control" placeholder="Telefon">
+              <input type="text" v-model="billing_address.phone" class="form-control" :placeholder="lang.phone">
             </div>
 
             <div class="form-group">
-              <input type="text" v-model="address.shipping.email" class="form-control" placeholder="E-mail">
+              <input type="text" v-model="billing_address.email" class="form-control" :placeholder="lang.email">
             </div>
 
             <div class="form-group">
-              <textarea rows="2" v-model="address.shipping.address" class="form-control" placeholder="Adresa"></textarea>
+              <textarea rows="2" v-model="billing_address.address" class="form-control" :placeholder="lang.address"></textarea>
+            </div>
+
+            <div class="form-group">
+              <textarea rows="2" v-model="note" class="form-control" :placeholder="lang.note"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>
+                <input type="checkbox" v-model="ship_to_different_address">
+                {{ lang.ship_to_different_address }}
+              </label>
+            </div>
+
+            <div v-show="ship_to_different_address">
+              <div class="form-group">
+                <input type="text" v-model="shipping_address.name" class="form-control" :placeholder="lang.first_name_and_last_name">
+              </div>
+
+              <div class="form-group">
+                <textarea rows="2" v-model="shipping_address.address" class="form-control" :placeholder="lang.address"></textarea>
+              </div>
             </div>
 
             <div class="form-group order__selection payment__selection">
-              <label class="control-label">Platba</label>
+              <label class="control-label">{{ lang.choose_payment }}</label>
               <div class="order_selection_options">
                 <div class="order__option payment__option" v-for="payment in wp.gateways" :class="{ 'active' : isSelected('payment', payment.id) }" @click="select('payment', payment.id)">
                   <code class="order__option__code">{{ payment.id }}</code>
@@ -141,7 +162,7 @@
             </div>
 
             <div class="form-group order__selection shipping__selection">
-              <label class="control-label">Doprava</label>
+              <label class="control-label">{{ lang.choose_shipping }}</label>
               <div class="order_selection_options">
                 <div class="order__option shipping__option" v-for="shipping in wp.shipping" :class="{ 'active' : isSelected('shipping', shipping.id) }" @click="selectShipping(shipping)">
                   <code class="order__option__code">{{ shipping.id }}</code>
@@ -154,7 +175,7 @@
 
             <div class="form-group">
               <button type="button" @click="order()">
-                Objednat
+                {{ lang.place_order }}
               </button>
             </div>
 
@@ -186,6 +207,20 @@
         vm.shipping = vm.wp.wc_selected.shipping_methods[0]
 
       this.updateCart()
+
+      for ( var key in vm.wp.wc_user.billing ) {
+        if ( typeof vm.wp.wc_user.billing[key] !== 'undefined' && vm.wp.wc_user.billing[key] !== false ) {
+          vm.billing_address[key] = vm.wp.wc_user.billing[key]
+        }
+      }
+
+      if ( ( typeof vm.wp.wc_user.billing['first_name'] !== 'undefined' || typeof vm.wp.wc_user.billing['last_name'] !== 'undefined' ) && vm.wp.wc_user.billing['first_name'] !== false && vm.wp.wc_user.billing['last_name'] !== false ) {
+        vm.billing_address['name'] = vm.wp.wc_user.billing['first_name'] + ' ' + vm.wp.wc_user.billing['last_name']
+      }
+
+      if ( (typeof vm.wp.wc_user.billing['address_1'] !== 'undefined' || typeof vm.wp.wc_user.billing['address_2'] !== 'undefined') && vm.wp.wc_user.billing['address_1'] !== false && vm.wp.wc_user.billing['address_2'] !== false ) {
+        vm.billing_address['address'] = vm.wp.wc_user.billing['address_1'] + "\n" + vm.wp.wc_user.billing['address_2']
+      }
     },
 
     data() {
@@ -197,27 +232,24 @@
           content: { rendered: '' }
         },
         wp: window.wp,
-        lang: wp.lang,
+        lang: window.lang,
         cart: {},
         payment: null,
         shipping: null,
         shipping_total: 0,
-        address: {
-          billing : {
-            'name'   : '',
-            'company': '',
-            'email'  : '',
-            'phone'  : '',
-            'address': '',
-          },
-          shipping: {
-            'name'   : '',
-            'company': '',
-            'email'  : '',
-            'phone'  : '',
-            'address': '',
-          }
-        }
+        ship_to_different_address: false,
+        shipping_address: {
+          'name'   : '',
+          'address': '',
+        },
+        billing_address: {
+          'name'   : '',
+          'company': '',
+          'email'  : '',
+          'phone'  : '',
+          'address': '',
+        },
+        note: null
       }
     },
 
@@ -264,31 +296,29 @@
         })
       },
       order() {
-        let vm = this,
-            address = JSON.stringify(vm.address)
+        let vm = this
 
         window.wyvern.http.post(wp.root + 'api/order/', querystring.stringify({
-          'address' : address,
+          'shipping_address' : JSON.stringify(vm.shipping_address),
+          'billing_address' : JSON.stringify(vm.billing_address),
           'shipping' : vm.shipping,
-          'payment' : vm.payment
+          'payment' : vm.payment,
+          'customer_id' : vm.wp.customer_id,
+          'note' : vm.note
         })).then((response) => {
           vm.$set(vm, 'cart', response.data.cart)
 
-          vm.address = {
-            billing : {
-              'name'   : '',
-              'company': '',
-              'email'  : '',
-              'phone'  : '',
-              'address': '',
-            },
-            shipping: {
-              'name'   : '',
-              'company': '',
-              'email'  : '',
-              'phone'  : '',
-              'address': '',
-            }
+          vm.shipping_address = {
+            'name'   : '',
+            'address': '',
+          }
+
+          vm.billing_address = {
+            'name'   : '',
+            'company': '',
+            'email'  : '',
+            'phone'  : '',
+            'address': '',
           }
 
           window.eventHub.$emit('update-cart', response.data.cart, response.data.cart_total)

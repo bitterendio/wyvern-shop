@@ -113,7 +113,7 @@
         values: [],
 
         show_values: false,
-        all: 'VŠE'
+        lang: window.lang
       }
     },
 
@@ -129,7 +129,7 @@
         })
 
         if ( output.length == 0 )
-          return this.all
+          return this.lang.all
 
         return output.join(', ')
       }
@@ -148,7 +148,7 @@
       },
       select(value) {
         let index = this.values.indexOf(value)
-        console.log(index)
+
         if ( index > -1 )
           this.values.splice(index, 1)
         else

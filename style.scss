@@ -1,28 +1,69 @@
-/*
- Theme Name:   Wyvern Shop
- Theme URI:    http://sanatorium.ninja
- Description:  Wyvern Child Theme
- Author:       Sanatorium
- Author URI:   http://sanatorium.ninja
- Template:     wyvern
- Version:      1.0.0
- License:      GNU General Public License v2 or later
- License URI:  http://www.gnu.org/licenses/gpl-2.0.html
- Tags:         light
- Text Domain:  wyvern-child
-*/
+/**
+ * CONTENTS
+ *
+ * SETTINGS
+ * Global...............Globally-available variables and config.
+ * Parent...............Parent styles
+ *
+ * GENERIC
+ * Normalize.css........A level playing field.
+ *
+ * BASE
+ * Typo.................Fonts and general typography
+ * Colors...............Typo colors, links
+ * Layout...............Layout structure
+ * Forms................Buttons, inputs
+ *
+ * COMPONENTS
+ * Messages.............Notification center
+ *
+ * PLUGINS
+ * Headroom.............Headroom.js sticky header
+ * Pace.................Pace progress bar
+ * Ladda................Ladda buttons
+ */
 
+/*------------------------------------*\
+  #SETTINGS
+\*------------------------------------*/
+
+/**
+ * Global
+ */
 @import '_variables.scss';
-@import '_ladda.scss';
-//
+
+/**
+ * Parent
+ */
 @import '../wyvern/style.scss';
 
+/*------------------------------------*\
+  #GENERIC
+\*------------------------------------*/
+
+/**
+ * Normalize.css
+ */
+@import 'node_modules/normalize.css/normalize.css';
+
+/*------------------------------------*\
+  #BASE
+\*------------------------------------*/
+
+/**
+ * Typo
+ */
 @import url('https://fonts.googleapis.com/css?family=Roboto:400,500,700&subset=latin-ext');
 
 body {
-  font-family: 'Roboto', sans-serif;
+  font-family: $font-family;
+  font-size: $font-size;
+  line-height: $line-height;
 }
 
+/**
+ * Colors
+ */
 a {
   color: $link-color;
   cursor: pointer;
@@ -32,6 +73,9 @@ a {
   }
 }
 
+/**
+ * Layout
+ */
 body {
   .page.content {
     padding-top: $header-height;
@@ -82,61 +126,60 @@ body {
   }
 }
 
-// Navigation
-.nav {
-
+/**
+ * Forms
+ */
+// Group
+.form-group {
+  padding: 5px 0;
 }
 
-.list-nav {
-  list-style-type: none;
-  padding-left: 0;
-  font-size: 21px;
-  line-height: 30px;
-  .active {
-    color: $hover-color;
-  }
+.form-group--lg {
+  .control-label { display: none; }
 }
 
-.list-nav--footer {
-  font-size: 12px;
-  line-height: 20px;
-  font-weight: 700;
-  text-transform: uppercase;
-  width: $sidebar-width;
-  position: fixed;
-  bottom: 20px;
+// Buttons
+.btn { }
 
-  &:before {
-    position: absolute;
-    top: -20px;
-    content: "";
-    display: block;
-    height: 5px;
-    width: 50px;
-    background-color: $link-color;
-  }
-
-  .item--social {
-    position: absolute;
-    top: -50px;
-    font-size: 20px;
-    font-family: monospace;
-    &:nth-of-type(2) {
-      left: 20px;
-    }
-  }
-}
-
-.btn {
-}
-
-.btn--cart {
-  background-color: $brand-primary;
-  color: #fff;
-  padding: 10px 25px;
+.btn--block {
+  display: block;
   width: 100%;
+}
+
+.btn--lg {
+  line-height: calc($line-height*2.5);
+}
+
+.btn--facebook {
+  background-color: $color-facebook-bg;
+  color: $color-facebook-fg;
+
+  background-image: resolve(./assets/icons/facebook.svg);
+  background-repeat: no-repeat;
+  background-size: 16px 16px;
+  background-position: 20px center;
+}
+
+.btn--google {
+  background-color: $color-google-bg;
+  color: $color-google-fg;
+
+  background-image: resolve(./assets/icons/google.svg);
+  background-repeat: no-repeat;
+  background-size: 16px 16px;
+  background-position: 20px center;
+}
+
+.btn__login {
+  border: 1xp solid $brand-border;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+  border-radius: 4px;
+  margin-top: 0.5em;
+  &.btn--facebook {
+    border: 1px solid $color-facebook-bg;
+  }
   &:hover {
-    background-color: $hover-color;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.4);
   }
 }
 
@@ -148,10 +191,43 @@ body {
   line-height: 30px;
 }
 
-.form-group {
-  padding: 5px 0;
+.form-control--lg {
+  line-height: calc($line-height*2.5);
+  border-radius: 4px;
 }
 
+// or-line
+.or-line {
+  position: relative;
+  width: 100%;
+  text-align: center;
+  height: $line-height;
+  margin-top: calc($line-height/2);
+  margin-bottom: calc($line-height/2);
+  &:after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: calc($line-height/2);
+    width: 100%;
+    height: 1px;
+    background-color: $brand-border;
+    z-index: 1;
+  }
+  span {
+    display: inline-block;
+    margin: 0 auto;
+    background: $background-color;
+    z-index: 2;
+    position: relative;
+    padding-left: 1em;
+    padding-right: 1em;
+  }
+}
+
+/**
+ * Order selection
+ */
 .order__selection {
   display: flex;
   & > * {
@@ -186,6 +262,71 @@ body {
     display: none;
   }
 }
+
+
+
+// Navigation
+.nav {
+
+}
+
+.nav.nav--list {
+  padding-left: 0;
+  display: block;
+  width: 100%;
+  li {
+    display: block;
+    width: 100%;
+    button {
+      display: block;
+      width: 100%;
+      &.active {
+        font-weight: 700;
+      }
+    }
+  }
+}
+
+.list-nav {
+  list-style-type: none;
+  padding-left: 0;
+  font-size: 21px;
+  line-height: 30px;
+  .active {
+    color: $hover-color;
+  }
+}
+
+.list-nav--footer {
+  font-size: 12px;
+  line-height: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  width: $sidebar-width;
+  position: fixed;
+  bottom: 20px;
+
+  &:before {
+    position: absolute;
+    top: -20px;
+    content: "";
+    display: block;
+    height: 5px;
+    width: 50px;
+    background-color: $link-color;
+  }
+
+  .item--social {
+    position: absolute;
+    top: -60px;
+    font-size: 20px;
+    font-family: monospace;
+    &:nth-of-type(2) {
+      left: 30px;
+    }
+  }
+}
+
 
 // Tables
 .table {
@@ -231,11 +372,56 @@ body {
   }
 }
 
+// Orders
+.order__list {
+
+}
+
+.order__entry {
+  border: 1px solid $brand-border;
+  padding: 5px 15px;
+  margin-bottom: 5px;
+  cursor: pointer;
+  &:hover {
+    background-color: #eee;
+  }
+}
+
+// Icons
+
+.icon {
+
+}
+
+.icon__social {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 20px 20px;
+  opacity: 0.75;
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.icon--facebook {
+  background-image: resolve(./assets/icons/facebook_dark.svg);
+}
+
+.icon--instagram {
+  background-image: resolve(./assets/icons/instagram_dark.svg);
+  background-size: 18px 18px;
+}
+
+/*------------------------------------*\
+  #COMPONENTS
+\*------------------------------------*/
 
 /**
  * Messages
  */
-
 .messages {
   position: fixed;
   z-index: 1000;
@@ -272,14 +458,6 @@ body {
 }
 
 
-// Ladda buttons
-.ladda-button[data-style=contract] {
-  width: 100%;
-  height: 52px;
-}
-.ladda-button[data-style=contract][data-loading] {
-  height: 52px;
-}
 
 // Transitions
 .slide-up-enter-active, .slide-up-leave-active {
@@ -305,7 +483,13 @@ body {
   transform: translateY(30px);
 }
 
-// Header animation
+/*------------------------------------*\
+  #PLUGINS
+\*------------------------------------*/
+
+/**
+ * Headroom
+ */
 .animated {
   animation-duration: 0.5s;
   animation-fill-mode: both;
@@ -343,7 +527,9 @@ body {
   animation-name: slideUp;
 }
 
-// Pace
+/**
+ * Pace
+ */
 .pace {
   -webkit-pointer-events: none;
   pointer-events: none;
@@ -365,4 +551,17 @@ body {
   right: 100%;
   width: 100%;
   height: 2px;
+}
+
+/**
+ * Ladda
+ */
+@import '_ladda.scss';
+
+.ladda-button[data-style=contract] {
+  width: 100%;
+  height: 52px;
+}
+.ladda-button[data-style=contract][data-loading] {
+  height: 52px;
 }

@@ -15,12 +15,12 @@
     <ul class="list-nav list-nav--footer">
       <li class="item--social">
         <a href="#" target="_blank">
-          X
+          <i class="icon icon__social icon--facebook"></i>
         </a>
       </li>
       <li class="item--social">
         <a href="#" target="_blank">
-          X
+          <i class="icon icon__social icon--instagram"></i>
         </a>
       </li>
       <li v-for="item in menu">

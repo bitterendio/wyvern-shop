@@ -8,7 +8,7 @@
     top: 0;
     left: 0;
     width: 100%;
-    z-index: 3;
+    z-index: 100;
   }
 
   .page.content {
@@ -104,20 +104,15 @@
   <div class="theme-header">
     <div class="container site-header">
       <div class="site-title" @click="clearFilters()">
-        <router-link :to="{ path: wp.base_path }" v-show="!wp.display.show_logo">{{ wp.site_name }}</router-link>
-        <router-link :to="{ path: wp.base_path }" v-show="wp.display.show_logo" class="block">
-          <img v-bind:src="wp.assets_path + '/images/logo.svg'"
-               v-bind:alt="wp.site_name"
-               height="40">
-        </router-link>
+        <router-link :to="{ path: wp.base_path }">{{ wp.site_name }}</router-link>
       </div>
       <div>
-        <router-link :to="{ path: wp.base_path }" v-if="$route.path != wp.base_path" class="nav__link">&lt; Zpět na katalog</router-link>
+        <router-link :to="{ path: wp.base_path }" v-if="$route.path != wp.base_path" class="nav__link">&lt; {{ lang.back_to_catalog }}</router-link>
       </div>
       <ul class="nav">
         <li class="nav__item__search">
           <a @click="toggleFilters()">
-            Hledat
+            {{ lang.search }}
           </a>
         </li>
         <li v-for="item in menu" class="nav__item">
@@ -177,7 +172,8 @@
         wp: window.wp,
         menu: [],
         show_filters: false,
-        filters: {}
+        filters: {},
+        lang: window.lang
       }
     },
 

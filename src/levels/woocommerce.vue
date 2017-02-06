@@ -74,6 +74,12 @@
       }
     }
   }
+
+  .price__block--discounted {
+    .price--regular {
+      text-decoration: line-through;
+    }
+  }
 </style>
 
 <template>
@@ -102,16 +108,22 @@
         </div>
       </div>
 
-      <h3 class="product__title">{{ product.title }}</h3>
+      <h3 class="product__title">{{ decode(product.title) }}</h3>
 
       <div class="product__excerpt">
         {{ product.excerpt }}
       </div>
 
-      <span v-html="product.formatted_prices.regular" class="price price--regular"></span>
+      <div v-if="product.formatted_prices.regular != product.formatted_prices.base" class="price__block--discounted">
+        <span v-html="product.formatted_prices.regular" class="price price--regular"></span>
+        <span v-html="product.formatted_prices.sale" class="price price--sale"></span>
+      </div>
+      <div class="price__block--regular" v-else>
+        <span v-html="product.formatted_prices.regular" class="price price--regular"></span>
+      </div>
 
       <button type="button" @click="addProduct(product)" class="btn btn--cart">
-        Add to cart
+        {{ lang.add_to_cart }}
       </button>
 
     </div>
@@ -120,7 +132,7 @@
 </template>
 
 <script>
-  var jQuery = require('jquery')
+  var querystring = require('querystring')
 
   export default {
 
@@ -134,7 +146,7 @@
       getProducts() {
         let vm = this
 
-        let query = jQuery.param( { filters: vm.filters } )
+        let query = querystring.stringify( { filters: JSON.stringify(vm.filters) } )
 
         window.wyvern.http.get(wp.root + 'api/products/?' + query).then((response) => {
           vm.products = response.data
@@ -207,7 +219,9 @@
 
         filters: {},
 
-        mousemove_gallery: true
+        mousemove_gallery: true,
+
+        lang: window.lang
       }
     },
 

@@ -69,6 +69,36 @@
       }
     }
   }
+
+  .available_variations--table {
+    .variation__image {
+      width: 80px;
+      img {
+        width: 80px;
+        height: 80px;
+      }
+    }
+    .variation__description {
+      padding-left: 20px;
+    }
+    .variation__price {
+      width: 100px;
+    }
+    .variation__buy {
+      width: 150px;
+    }
+    .variation__buy__btn {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+  }
+
+  .table-attributes {
+    td, th {
+      vertical-align: top;
+      padding-top: 0;
+    }
+  }
 </style>
 
 <template>
@@ -111,17 +141,20 @@
 
           <div class="product__detail--right">
 
-            <h1 class="entry-title">{{ product.title }}</h1>
+            <h1 class="entry-title">{{ decode(product.title) }}</h1>
+
+            <span v-html="product.formatted_prices.regular" class="price price--regular"></span>
 
             <ladda @click="addToCart(product)"
                    :stop="added"
                    color="green"
                    laddastyle="contract"
                    autostart="false">
-              Add to cart
+              {{ lang.add_to_cart }}
             </ladda>
 
-            <ol class="available_variations">
+            <!-- Variation selection: List -->
+            <ol class="available_variations" v-if="!settings.wyvern_theme_options_woocommerce.variations_table">
               <li v-for="variation in product.available_variations" v-if="variation.variation_is_active && variation.variation_is_visible" @click="selectVariation(variation)" :class="[{ 'active' : variation.variation_id == selected_variation }, getAttributeClass(variation.attributes) ]">
                 <span v-for="(value, key) in variation.attributes" :class="[ key + '__item' ]">
                   <span class="variation__attribute__label">{{ getAttributeByKey(key) }}</span>
@@ -130,12 +163,63 @@
               </li>
             </ol>
 
+            <!-- Attributes table -->
+            <table class="table table-attributes">
+              <tbody>
+                <tr v-for="(attribute, key) in product.attributes" v-if="attribute.length > 0 && isNotVariationAttribute(key, attribute, product.available_variations)">
+                  <th class="text-left">{{ getAttributeByKey(key) }}</th>
+                  <td>
+                    <ul>
+                      <li v-for="value in attribute">
+                        {{ value.name }}
+                      </li>
+                    </ul>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
           </div>
 
         </div>
 
         <div class="entry-content" v-html="product.content">
         </div>
+
+        <!-- Variation selection: Table -->
+        <table class="table available_variations--table" v-if="settings.wyvern_theme_options_woocommerce.variations_table">
+          <tbody>
+            <tr v-for="variation in product.available_variations" v-if="variation.variation_is_active && variation.variation_is_visible" :class="[{ 'active' : variation.variation_id == selected_variation }, getAttributeClass(variation.attributes) ]">
+              <td class="variation__image">
+                <img v-if="variation.image_src != ''" :src="variation.image_src">
+                <img  v-else
+                      :src="product.images.thumbnail[0]"
+                      :width="product.images.thumbnail[1]"
+                      :height="product.images.thumbnail[2]"
+                      :alt="product.title">
+              </td>
+              <td class="variation__description">
+                <span v-for="(value, key) in variation.attributes" :class="[ key + '__item' ]">
+                  <span class="variation__attribute__label">{{ getAttributeByKey(key) }}</span>
+                  <span class="variation__attribute__value">{{ value }}</span>
+                </span>
+              </td>
+              <td class="variation__price">
+                {{ price(variation.display_price) }}
+              </td>
+              <td class="variation__buy">
+                <ladda @click="addVariationToCart(product, variation)"
+                       :stop="added"
+                       color="green"
+                       laddastyle="contract"
+                       autostart="false"
+                      class="variation__buy__btn">
+                  {{ lang.add_to_cart }}
+                </ladda>
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
         <component is="levels" :object="product"></component>
 
@@ -173,12 +257,13 @@
           id: 0
         },
         product_gallery_preview: null,
-        lang: wp.lang,
         quantity: 1,
         added: false,
         wp: window.wp,
+        lang: window.lang,
         selected_variation: null,
-        variation: null
+        variation: null,
+        settings: window.settings
       }
     },
 
@@ -205,6 +290,10 @@
           this.added = true
         })
       },
+      addVariationToCart(product, variation) {
+        this.selectVariation(variation)
+        this.addToCart(product)
+      },
       selectVariation(selected_variation) {
         this.selected_variation = selected_variation.variation_id
 
@@ -219,6 +308,9 @@
         if ( typeof selected_variation.image_src !== 'undefined' && selected_variation.image_src !== '' )
           this.showGallery(selected_variation.image_src)
 
+        if ( typeof selected_variation.display_price !== 'undefined' )
+          this.product.formatted_prices.regular = this.price(selected_variation.display_price)
+
         this.variation = variation
       },
       getAttributeByKey(key) {
@@ -230,6 +322,22 @@
       },
       getAttributeClass(attributes) {
         return Object.keys(attributes).join(' variations__')
+      },
+      isNotVariationAttribute(main_attribute_key, attribute, available_variations) {
+        let variated_attributes = [],
+            attribute_woo_prefix = 'attribute_pa_'
+
+        for ( let key in available_variations )
+        {
+          let keys = Object.keys(available_variations[key].attributes)
+          for ( let i in keys )
+          {
+            let attribute_key = keys[i]
+            variated_attributes[attribute_key] = attribute_key
+          }
+        }
+
+        return typeof variated_attributes[attribute_woo_prefix + main_attribute_key] === 'undefined'
       }
     },
 

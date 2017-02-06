@@ -1,5 +1,6 @@
 $background-color: white;
 
+// Responsive breakpoints
 $screen-xs-max: 767px;
 $screen-sm-min: 768px;
 $screen-sm-max: 969px;
@@ -7,14 +8,33 @@ $screen-md-min: 970px;
 $screen-md-max: 1169px;
 $screen-lg-min: 1170px;
 
+// Typo
+$font-family: 'Roboto', sans-serif;
+$font-size: 16px;
+$line-height: 24px;
+
+// Colors
 $link-color: #868686;
 $hover-color: #0a0a0a;
 $brand-primary: #4D4D4D;
+$brand-border: #eee;
 
+// Layout
 $container-width: 1360px;
 $sidebar-width: 240px;
 
+// Header
 $header-height: 80px;
 $header-background: #f2f2f2;
 
+// Filter
 $filter-height: 220px;
+
+// 3rd party colors
+$color-facebook-brand: #3b5998;
+$color-google-brand: #fff;
+
+$color-facebook-bg: $color-facebook-brand;
+$color-facebook-fg: #fff;
+$color-google-bg: $color-google-brand;
+$color-google-fg: #444;
