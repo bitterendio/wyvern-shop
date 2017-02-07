@@ -33,60 +33,64 @@
 <script>
   export default {
     mounted() {
-      var vm = this
+      const vm = this;
       this.getMenuLocation('footer', (response) => {
-        vm.menu = response
-      })
+        vm.menu = response;
+      });
     },
 
     data() {
       return {
         wp: window.wp,
         menu: [],
-        filters: {}
-      }
+        filters: {},
+      };
     },
 
     methods: {
       selectFilter(name, value) {
-        window.eventHub.$emit('filter-changed', name, value)
+        window.eventHub.$emit('filter-changed', name, value);
       },
       setFilters(filters) {
-        this.filters = filters
+        this.filters = filters;
       },
       setFilter(name, value) {
-        this.filters[name] = value
+        this.filters[name] = value;
       },
       isSelected(name, value) {
-        if ( typeof this.filters === 'undefined' )
-          return false
-
-        if ( typeof this.filters[name] === 'undefined' )
-          return false
-
-        if ( this.filters[name] === null )
-          return false
-
-        if ( this.filters[name] === value )
-          return true
-
-        if ( typeof this.filters[name] === 'array' ) {
-          if (this.filters[name].indexOf(value) > -1)
-            return true
+        if (typeof this.filters === 'undefined') {
+          return false;
         }
 
-        return false
-      }
+        if (typeof this.filters[name] === 'undefined') {
+          return false;
+        }
+
+        if (this.filters[name] === null) {
+          return false;
+        }
+
+        if (this.filters[name] === value) {
+          return true;
+        }
+        if (Object.prototype.toString.call(this.filters[name]) === '[object Array]') {
+          if (this.filters[name].indexOf(value) > -1) {
+            return true;
+          }
+        }
+
+        return false;
+      },
     },
 
     created() {
-      window.eventHub.$on('filters-changed', this.setFilters)
-      window.eventHub.$on('filter-changed', this.setFilter)
+      window.eventHub.$on('filters-changed', this.setFilters);
+      window.eventHub.$on('filter-changed', this.setFilter);
     },
 
     beforeDestroy() {
-      window.eventHub.$off('filters-changed')
-      window.eventHub.$off('filter-changed')
-    }
-  }
+      window.eventHub.$off('filters-changed');
+      window.eventHub.$off('filter-changed');
+    },
+  };
 </script>

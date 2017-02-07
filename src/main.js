@@ -1,118 +1,114 @@
-import { routes, Vue, VueRouter, capitalize, getTemplateHierarchy } from '../../wyvern/src/app'
+import { routes, Vue, VueRouter } from '../../wyvern/src/app';
 
-// Override component example
-import Header from './theme-header.vue'
-Vue.component('theme-header', Header)
+import Header from './theme-header.vue';
+import Page from './page.vue';
+import Cart from './cart.vue';
+import Checkout from './checkout.vue';
+import Account from './account.vue';
+import Product from './product.vue';
+import Woocommerce from './levels/woocommerce.vue';
+import Select from './components/select.vue';
+import NumberComponent from './components/number.vue';
+import Ladda from './components/ladda.vue';
+import Sidebar from './sidebar.vue';
+import '../style.scss';
 
-import Page from './page.vue'
-Vue.component('Page', Page)
-
-import Cart from './cart.vue'
-Vue.component('Cart', Cart)
-
-import Checkout from './checkout.vue'
-Vue.component('Checkout', Checkout)
-window.wp.templates.push('Checkout')
-
-import Account from './account.vue'
-Vue.component('Account', Account)
-window.wp.templates.push('Account')
+Vue.component('theme-header', Header);
+Vue.component('Page', Page);
+Vue.component('Cart', Cart);
+Vue.component('Checkout', Checkout);
+Vue.component('Account', Account);
+Vue.component('Product', Product);
+Vue.component('woocommerce', Woocommerce);
+Vue.component('select-component', Select);
+Vue.component('number-component', NumberComponent);
+Vue.component('ladda', Ladda);
+Vue.component('sidebar', Sidebar);
+window.wp.templates.push('Checkout');
+window.wp.templates.push('Account');
 
 routes.add({
-  path: wp.base_path + 'checkout/pay/:id/',
+  path: `${window.wp.base_path}checkout/pay/:id/`,
   component: Checkout,
   meta: {
     postId: 7,
     name: 'Checkout',
     slug: 'checkout',
-    action: 'pay'
-  }
+    action: 'pay',
+  },
 });
 
 routes.add({
-  path: wp.base_path + 'checkout/order-received/:id/',
+  path: `${window.wp.base_path}checkout/order-received/:id/`,
   component: Checkout,
   meta: {
     postId: 7,
     name: 'Checkout',
     slug: 'checkout',
-    action: 'order-received'
-  }
+    action: 'order-received',
+  },
 });
 
 routes.add({
-  path: wp.base_path + 'account',
+  path: `${window.wp.base_path}account`,
   component: Account,
   meta: {
     postId: 8,
     name: 'Account',
     slug: 'account',
-  }
+  },
 });
 
-import Product from './product.vue'
-Vue.component('Product', Product)
+routes.refresh();
 
-import Woocommerce from './levels/woocommerce.vue'
-Vue.component('woocommerce', Woocommerce)
-
-routes.refresh()
-
-import Select from './components/select.vue'
-Vue.component('select-component', Select)
-
-import Ladda from './components/ladda.vue'
-Vue.component('ladda', Ladda)
-
-import Sidebar from './sidebar.vue'
-Vue.component('sidebar', Sidebar)
-
-// Import styles
-import './../style.scss'
-
-Number.prototype.formatMoney = function(c, d, t){
-  var n = this,
-      c = isNaN(c = Math.abs(c)) ? 2 : c,
-      d = d == undefined ? "." : d,
-      t = t == undefined ? "," : t,
-      s = n < 0 ? "-" : "",
-      i = String(parseInt(n = Math.abs(Number(n) || 0).toFixed(c))),
-      j = (j = i.length) > 3 ? j % 3 : 0;
-  return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
-};
+function formatMoney(input, decimals, decimalSeparator, thousandSeparator) {
+  let c = decimals;
+  let d = decimalSeparator;
+  let t = thousandSeparator;
+  let n = input;
+  c = isNaN(Math.abs(c)) ? 2 : Math.abs(c);
+  d = d === undefined ? '.' : d;
+  t = t === undefined ? ',' : t;
+  const s = n < 0 ? '-' : '';
+  const i = String(parseInt(n = Math.abs(Number(n) || 0).toFixed(c), 10));
+  const j = i.length > 3 ? i.length % 3 : 0;
+  return s
+      + (j ? i.substr(0, j) + t : '')
+      + i.substr(j).replace(/(\d{3})(?=\d)/g, `$1${t}`)
+      + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : '');
+}
 
 Vue.mixin({
   methods: {
     price(value) {
-      let money = parseFloat(value).formatMoney(window.wp.decimals, window.wp.decimal_separator, window.wp.thousand_separator)
+      const money = formatMoney(parseFloat(value),
+          window.wp.decimals,
+          window.wp.decimal_separator,
+          window.wp.thousand_separator);
 
       switch (window.wp.price_format) {
         case '%2$s %1$s':
-          return money + ' ' + window.wp.currency_symbol
-          break;
+          return `${money}&nbsp;${window.wp.currency_symbol}`;
         case '%2$s%1$s':
-          return money + '' + window.wp.currency_symbol
-          break;
+          return `${money}${window.wp.currency_symbol}`;
         case '%1$s%2$s':
-          return window.wp.currency_symbol + '' + money
-          break;
+          return `${window.wp.currency_symbol}${money}`;
         case '%1$s %2$s':
         default:
-          return window.wp.currency_symbol + ' ' + money
-          break;
+          return `${window.wp.currency_symbol}&nbsp;${money}`;
       }
-    }
-  }
-})
+    },
+  },
+});
 
 // Create router instance
-var router = new VueRouter({
+const router = new VueRouter({
   mode: 'history',
-  routes: routes.get()
+  routes: routes.get(),
 });
 
 // Start app
-const App = new Vue({
+new Vue({ // eslint-disable-line no-new
   el: '#app',
 
   template: '<div class="template-wrapper">' +
@@ -126,27 +122,27 @@ const App = new Vue({
     '</div>' +
   '</div>',
 
-  router: router,
+  router,
 
   data() {
     return {
-      messages: []
-    }
+      messages: [],
+    };
   },
 
   mounted() {
-    this.updateTitle('')
-    this.trackGA()
+    this.updateTitle('');
+    this.trackGA();
   },
 
   methods: {
     updateTitle(pageTitle) {
-      document.title = (pageTitle ? pageTitle + ' - ' : '') + wp.site_name
+      document.title = `${(pageTitle ? `${pageTitle} - ` : '')}${window.wp.site_name}`;
     },
     trackGA() {
-      if ( typeof ga == 'function' ) {
-        ga('set', 'page', '/' + window.location.pathname.substr(1))
-        ga('send', 'pageview')
+      if (typeof window.ga === 'function') {
+        window.ga('set', 'page', `/${window.location.pathname.substr(1)}`);
+        window.ga('send', 'pageview');
       }
     },
     /**
@@ -157,42 +153,42 @@ const App = new Vue({
      * }
      */
     message(configuration) {
-      var self = this;
+      const self = this;
 
       // Add message to notification center
       self.messages.push({
         type: configuration.type,
-        message: configuration.message
-      })
+        message: configuration.message,
+      });
 
       // Hide message after timeout
-      setTimeout(function(){
-        self.messages.splice(0,1)
-      }, 2000)
-    }
+      setTimeout(self.removeLastMessage, 2000);
+    },
+    removeLastMessage() {
+      this.messages.splice(0, 1);
+    },
   },
 
   // Create listeners
-  created: function () {
-    window.eventHub.$on('page-title', this.updateTitle)
-    window.eventHub.$on('track-ga', this.trackGA)
-    window.eventHub.$on('message', this.message)
+  created() {
+    window.eventHub.$on('page-title', this.updateTitle);
+    window.eventHub.$on('track-ga', this.trackGA);
+    window.eventHub.$on('message', this.message);
   },
 
   // It's good to clean up event listeners before
   // a component is destroyed.
-  beforeDestroy: function () {
-    window.eventHub.$off('page-title', this.updateTitle)
-    window.eventHub.$off('track-ga', this.trackGA)
-    window.eventHub.$off('message')
+  beforeDestroy() {
+    window.eventHub.$off('page-title', this.updateTitle);
+    window.eventHub.$off('track-ga', this.trackGA);
+    window.eventHub.$off('message');
   },
 
   watch: {
     // Changed route
-    '$route' (to, from) {
-      window.eventHub.$emit('changed-route')
-      window.eventHub.$emit('filters-changed', {})
-      console.log(to,from)
-    }
-  }
+    $route(to, from) {
+      window.eventHub.$emit('changed-route', to, from);
+      window.eventHub.$emit('filters-changed', {});
+    },
+  },
 });

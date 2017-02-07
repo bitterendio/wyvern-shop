@@ -29,16 +29,16 @@
 
   export default {
     mounted() {
-      var vm = this;
+      const vm = this;
       this.getPage((data) => {
-        vm.page = data
-        window.eventHub.$emit('page-title', vm.page.title.rendered)
-        window.eventHub.$emit('track-ga')
-      })
+        vm.page = data;
+        window.eventHub.$emit('page-title', vm.page.title.rendered);
+        window.eventHub.$emit('track-ga');
+      });
 
       this.getMenuLocation('footer', (response) => {
-        vm.menu = response
-      })
+        vm.menu = response;
+      });
     },
 
     data() {
@@ -47,12 +47,12 @@
           id: 0,
           slug: '',
           title: { rendered: '' },
-          content: { rendered: '' }
+          content: { rendered: '' },
         },
-        lang: wp.lang,
+        lang: window.lang,
         wp: window.wp,
-        menu: []
-      }
+        menu: [],
+      };
     },
 
     methods: {
@@ -62,7 +62,7 @@
     route: {
       canReuse() {
         return false;
-      }
-    }
-  }
+      },
+    },
+  };
 </script>

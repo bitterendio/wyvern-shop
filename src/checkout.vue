@@ -45,28 +45,28 @@
 </template>
 
 <script>
-  var querystring = require('querystring')
+  const querystring = require('querystring');
 
   export default {
     mounted() {
-      var vm = this
+      const vm = this;
 
-      vm.params = this.getSearchParameters()
+      vm.params = this.getSearchParameters();
 
       this.getPage((data) => {
-        vm.page = data
-        window.eventHub.$emit('page-title', vm.page.title.rendered)
-        window.eventHub.$emit('track-ga')
-      })
+        vm.page = data;
+        window.eventHub.$emit('page-title', vm.page.title.rendered);
+        window.eventHub.$emit('track-ga');
+      });
 
-      let query = querystring.stringify({
-        'order_id' : this.$route.params.id,
-        'key' : vm.params.key
-      })
+      const query = querystring.stringify({
+        order_id: this.$route.params.id,
+        key: vm.params.key,
+      });
 
-      window.wyvern.http.get(wp.root + 'api/order/?' + query).then((response) => {
-        vm.order = response.data
-      })
+      window.wyvern.http.get(`${vm.wp.root}api/order/?${query}`).then((response) => {
+        vm.order = response.data;
+      });
     },
 
     data() {
@@ -75,37 +75,37 @@
           id: 0,
           slug: '',
           title: { rendered: '' },
-          content: { rendered: '' }
+          content: { rendered: '' },
         },
         lang: window.lang,
         wp: window.wp,
         menu: [],
         params: {},
-        order: {}
-      }
+        order: {},
+      };
     },
 
     methods: {
       // @todo: look if querystring could do that
       getSearchParameters() {
-        var prmstr = window.location.search.substr(1);
-        return prmstr != null && prmstr != "" ? this.transformToAssocArray(prmstr) : {};
+        const prmstr = window.location.search.substr(1);
+        return prmstr !== null && prmstr !== '' ? this.transformToAssocArray(prmstr) : {};
       },
-      transformToAssocArray( prmstr ) {
-        var params = {};
-        var prmarr = prmstr.split("&");
-        for ( var i = 0; i < prmarr.length; i++) {
-          var tmparr = prmarr[i].split("=");
+      transformToAssocArray(prmstr) {
+        const params = {};
+        const prmarr = prmstr.split('&');
+        for (let i = 0; i < prmarr.length; i + 1) {
+          const tmparr = prmarr[i].split('=');
           params[tmparr[0]] = tmparr[1];
         }
         return params;
-      }
+      },
     },
 
     route: {
       canReuse() {
         return false;
-      }
-    }
-  }
+      },
+    },
+  };
 </script>

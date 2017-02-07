@@ -11,6 +11,15 @@
     }
   }
 
+  .table__row--total {
+    line-height: 60px;
+    font-size: 12px;
+    color: #aaa;
+    &.totals__total {
+      color: #000;
+    }
+  }
+
   .item__row__thumbnail {
     width: 60px;
   }
@@ -19,10 +28,15 @@
     padding-left: 40px;
   }
 
+  .item__row__total {
+    text-align: right;
+  }
+
   .cols {
     & > .secondary {
       max-width: 590px;
       padding-left: 40px;
+      .column-title {}
     }
   }
 </style>
@@ -31,8 +45,6 @@
   <div class="page content" :class="[page.slug, page.template]">
 
     <div v-show="page.id">
-
-      <component is="levels" :object="page"></component>
 
       <div class="container">
 
@@ -62,11 +74,11 @@
                     </p>
                   </td>
                   <td class="item__row__quantity">
-                    <input type="number" v-model="item.quantity" @change="updateQuantity(key, item.quantity)">
+                    <number-component v-model="item.quantity" :default_value="item.quantity" @valuechange="updateQuantity(key, item.quantity)"></number-component>
                   </td>
                   <td>
-                    <button type="button" @click="updateQuantity(key, 0)">
-                      {{ lang.remove_from_cart }}
+                    <button type="button" @click="updateQuantity(key, 0)" :title="lang.remove_from_cart">
+                      X
                     </button>
                   </td>
                   <td class="item__row__total">
@@ -75,7 +87,7 @@
                 </tr>
               </tbody>
               <tfoot>
-                <tr class="totals__subtotal">
+                <tr class="table__row--total totals__subtotal">
                   <td colspan="2">
                     {{ lang.subtotal }}
                   </td>
@@ -83,7 +95,7 @@
                     {{ price(cart.subtotal) }}
                   </td>
                 </tr>
-                <tr class="totals__delivery">
+                <tr class="table__row--total totals__delivery">
                   <td colspan="2">
                     {{ lang.shipping_total }}
                   </td>
@@ -91,7 +103,7 @@
                     {{ price(cart.shipping_total) }}
                   </td>
                 </tr>
-                <tr class="totals__total">
+                <tr class="table__row--total totals__total">
                   <td colspan="2">
                     {{ lang.total }}
                   </td>
@@ -102,7 +114,7 @@
               </tfoot>
             </table>
 
-            <button type="button" @click="emptyCart()">
+            <button type="button" @click="emptyCart()" class="btn btn__empty_cart">
               {{ lang.empty_cart }}
             </button>
 
@@ -113,28 +125,35 @@
 
           <div class="secondary">
 
+            <h1 class="column-title">{{ lang.billing_address }}</h1>
+
             <div class="form-group">
-              <input type="text" v-model="billing_address.name" class="form-control" :placeholder="lang.first_name_and_last_name">
+              <label for="billing_name" class="control-label">{{ lang.first_name_and_last_name }}</label>
+              <input type="text" id="billing_name" v-model="billing_address.name" class="form-control" :placeholder="lang.first_name_and_last_name">
             </div>
 
             <div class="form-group">
-              <input type="text" v-model="billing_address.phone" class="form-control" :placeholder="lang.phone">
+              <label for="phone" class="control-label">{{ lang.phone }}</label>
+              <input type="text" id="phone" v-model="billing_address.phone" class="form-control" :placeholder="lang.phone">
             </div>
 
             <div class="form-group">
-              <input type="text" v-model="billing_address.email" class="form-control" :placeholder="lang.email">
+              <label for="email" class="control-label">{{ lang.email }}</label>
+              <input type="text" id="email" v-model="billing_address.email" class="form-control" :placeholder="lang.email">
             </div>
 
             <div class="form-group">
-              <textarea rows="2" v-model="billing_address.address" class="form-control" :placeholder="lang.address"></textarea>
+              <label for="address" class="control-label">{{ lang.address }}</label>
+              <textarea rows="2" id="address" v-model="billing_address.address" class="form-control" :placeholder="lang.address" autocorrect="off" spellcheck="false"></textarea>
             </div>
 
             <div class="form-group">
-              <textarea rows="2" v-model="note" class="form-control" :placeholder="lang.note"></textarea>
+              <label for="note" class="control-label">{{ lang.note }}</label>
+              <textarea rows="2" id="note" v-model="note" class="form-control" :placeholder="lang.note"></textarea>
             </div>
 
             <div class="form-group">
-              <label>
+              <label class="control-label control-label--checkbox">
                 <input type="checkbox" v-model="ship_to_different_address">
                 {{ lang.ship_to_different_address }}
               </label>
@@ -142,11 +161,13 @@
 
             <div v-show="ship_to_different_address">
               <div class="form-group">
-                <input type="text" v-model="shipping_address.name" class="form-control" :placeholder="lang.first_name_and_last_name">
+                <label for="shipping_name" class="control-label">{{ lang.first_name_and_last_name }}</label>
+                <input type="text" id="shipping_name" v-model="shipping_address.name" class="form-control" :placeholder="lang.first_name_and_last_name">
               </div>
 
               <div class="form-group">
-                <textarea rows="2" v-model="shipping_address.address" class="form-control" :placeholder="lang.address"></textarea>
+                <label for="shipping_address" class="control-label">{{ lang.address }}</label>
+                <textarea rows="2" id="shipping_address" v-model="shipping_address.address" class="form-control" :placeholder="lang.address" autocorrect="off" spellcheck="false"></textarea>
               </div>
             </div>
 
@@ -183,6 +204,8 @@
 
         </div>
 
+        <component is="levels" :object="page"></component>
+
       </div>
 
     </div>
@@ -191,35 +214,36 @@
 </template>
 
 <script>
-  var querystring = require('querystring')
+  const querystring = require('querystring');
 
   export default {
     mounted() {
-      var vm = this;
-      this.getPage(function(data){
-        vm.page = data
-        window.eventHub.$emit('page-title', vm.page.title.rendered)
-        window.eventHub.$emit('track-ga')
-      })
+      const vm = this;
+      this.getPage((data) => {
+        vm.page = data;
+        window.eventHub.$emit('page-title', vm.page.title.rendered);
+        window.eventHub.$emit('track-ga');
+      });
 
-      vm.payment = vm.wp.wc_selected.payment_method
-      if ( typeof vm.wp.wc_selected.shipping_methods[0] !== 'undefined' )
-        vm.shipping = vm.wp.wc_selected.shipping_methods[0]
+      vm.payment = vm.wp.wc_selected.payment_method;
+      if (typeof vm.wp.wc_selected.shipping_methods[0] !== 'undefined') {
+        vm.shipping = vm.wp.wc_selected.shipping_methods[0];
+      }
 
-      this.updateCart()
+      this.updateCart();
 
-      for ( var key in vm.wp.wc_user.billing ) {
-        if ( typeof vm.wp.wc_user.billing[key] !== 'undefined' && vm.wp.wc_user.billing[key] !== false ) {
-          vm.billing_address[key] = vm.wp.wc_user.billing[key]
+      Object.keys(vm.wp.wc_user.billing).forEach((key) => {
+        if (typeof vm.wp.wc_user.billing[key] !== 'undefined' && vm.wp.wc_user.billing[key] !== false) {
+          vm.billing_address[key] = vm.wp.wc_user.billing[key];
         }
+      });
+
+      if ((typeof vm.wp.wc_user.billing.first_name !== 'undefined' || typeof vm.wp.wc_user.billing.last_name !== 'undefined') && vm.wp.wc_user.billing.first_name !== false && vm.wp.wc_user.billing.last_name !== false) {
+        vm.billing_address.name = `${vm.wp.wc_user.billing.first_name} ${vm.wp.wc_user.billing.last_name}`;
       }
 
-      if ( ( typeof vm.wp.wc_user.billing['first_name'] !== 'undefined' || typeof vm.wp.wc_user.billing['last_name'] !== 'undefined' ) && vm.wp.wc_user.billing['first_name'] !== false && vm.wp.wc_user.billing['last_name'] !== false ) {
-        vm.billing_address['name'] = vm.wp.wc_user.billing['first_name'] + ' ' + vm.wp.wc_user.billing['last_name']
-      }
-
-      if ( (typeof vm.wp.wc_user.billing['address_1'] !== 'undefined' || typeof vm.wp.wc_user.billing['address_2'] !== 'undefined') && vm.wp.wc_user.billing['address_1'] !== false && vm.wp.wc_user.billing['address_2'] !== false ) {
-        vm.billing_address['address'] = vm.wp.wc_user.billing['address_1'] + "\n" + vm.wp.wc_user.billing['address_2']
+      if ((typeof vm.wp.wc_user.billing.address_1 !== 'undefined' || typeof vm.wp.wc_user.billing.address_2 !== 'undefined') && vm.wp.wc_user.billing.address_1 !== false && vm.wp.wc_user.billing.address_2 !== false) {
+        vm.billing_address.address = `${vm.wp.wc_user.billing.address_1}\n${vm.wp.wc_user.billing.address_2}`;
       }
     },
 
@@ -229,7 +253,7 @@
           id: 0,
           slug: '',
           title: { rendered: '' },
-          content: { rendered: '' }
+          content: { rendered: '' },
         },
         wp: window.wp,
         lang: window.lang,
@@ -239,142 +263,160 @@
         shipping_total: 0,
         ship_to_different_address: false,
         shipping_address: {
-          'name'   : '',
-          'address': '',
+          name: '',
+          address: '',
         },
         billing_address: {
-          'name'   : '',
-          'company': '',
-          'email'  : '',
-          'phone'  : '',
-          'address': '',
+          name: '',
+          company: '',
+          email: '',
+          phone: '',
+          address: '',
         },
-        note: null
-      }
+        note: null,
+        thumbnails: {},
+      };
     },
 
     methods: {
       emptyCart() {
-        let vm = this
-        window.wyvern.http.get(wp.root + 'api/empty-cart/').then((response) => {
-          vm.cart = {}
+        const vm = this;
+        window.wyvern.http.get(`${vm.wp.root}api/empty-cart/`).then(() => {
+          vm.cart = {};
 
-          window.eventHub.$emit('empty-cart')
-        })
+          window.eventHub.$emit('empty-cart');
+        });
       },
       updateCart() {
-        let vm = this
+        const vm = this;
 
-        let params = querystring.stringify({
-          'shipping_total' : vm.shipping_total,
-          'shipping' : vm.shipping,
-          'payment' : vm.payment,
-        })
+        const params = querystring.stringify({
+          shipping_total: vm.shipping_total,
+          shipping: vm.shipping,
+          payment: vm.payment,
+        });
 
-        window.wyvern.http.get(wp.root + 'api/cart/?' + params).then((response) => {
-          vm.cart = response.data
+        window.wyvern.http.get(`${vm.wp.root}api/cart/?${params}`).then((response) => {
+          vm.cart = response.data;
 
-          // Set images for all items
-          for( let key in vm.cart.cart_contents ) {
-            let item = vm.cart.cart_contents[key]
+          vm.refreshThumbnails();
+        });
+      },
+      refreshThumbnails() {
+        const vm = this;
 
-            window.wyvern.http.get(wp.root + 'api/thumbnails/' + item.data.post.ID).then((response) => {
-              vm.$set(vm.cart.cart_contents[key], 'thumbnail', response.data)
-            })
+        // Set images for all items
+        Object.keys(vm.cart.cart_contents).forEach((key) => {
+          const item = vm.cart.cart_contents[key];
+
+          // Check if thumbnail is already loaded
+          if (typeof vm.thumbnails[item.data.post.ID] !== 'undefined') {
+            vm.$set(vm.cart.cart_contents[key], 'thumbnail', vm.thumbnails[item.data.post.ID]);
+          } else {
+            window.wyvern.http.get(`${vm.wp.root}api/thumbnails/${item.data.post.ID}`).then((response) => {
+              vm.$set(vm.cart.cart_contents[key], 'thumbnail', response.data);
+              vm.thumbnails[item.data.post.ID] = response.data;
+            });
           }
-        })
+        });
       },
       updateQuantity(id, quantity) {
-        let vm = this
-        window.wyvern.http.post(wp.root + 'api/quantity/', querystring.stringify({
-          'id' : id,
-          'quantity' : quantity
+        const vm = this;
+        window.wyvern.http.post(`${vm.wp.root}api/quantity/`, querystring.stringify({
+          id, quantity,
         })).then((response) => {
-          vm.$set(vm, 'cart', response.data.cart)
+          vm.$set(vm, 'cart', response.data.cart);
 
-          window.eventHub.$emit('update-cart', response.data.cart, response.data.cart_total)
-        })
+          vm.refreshThumbnails();
+
+          window.eventHub.$emit('update-cart', response.data.cart, response.data.cart_total);
+        });
       },
       order() {
-        let vm = this
+        const vm = this;
 
-        window.wyvern.http.post(wp.root + 'api/order/', querystring.stringify({
-          'shipping_address' : JSON.stringify(vm.shipping_address),
-          'billing_address' : JSON.stringify(vm.billing_address),
-          'shipping' : vm.shipping,
-          'payment' : vm.payment,
-          'customer_id' : vm.wp.customer_id,
-          'note' : vm.note
+        window.wyvern.http.post(`${vm.wp.root}api/order/`, querystring.stringify({
+          shipping_address: JSON.stringify(vm.shipping_address),
+          billing_address: JSON.stringify(vm.billing_address),
+          shipping: vm.shipping,
+          payment: vm.payment,
+          customer_id: vm.wp.customer_id,
+          note: vm.note,
         })).then((response) => {
-          vm.$set(vm, 'cart', response.data.cart)
+          vm.$set(vm, 'cart', response.data.cart);
 
           vm.shipping_address = {
-            'name'   : '',
-            'address': '',
-          }
+            name: '',
+            address: '',
+          };
 
           vm.billing_address = {
-            'name'   : '',
-            'company': '',
-            'email'  : '',
-            'phone'  : '',
-            'address': '',
+            name: '',
+            company: '',
+            email: '',
+            phone: '',
+            address: '',
+          };
+
+          window.eventHub.$emit('update-cart', response.data.cart, response.data.cart_total);
+
+          if (typeof response.data.redirect === 'undefined') {
+            return;
           }
 
-          window.eventHub.$emit('update-cart', response.data.cart, response.data.cart_total)
-
-          if ( typeof response.data.redirect === 'undefined' )
+          if (response.data.redirect === '') {
             return;
+          }
 
-          if ( response.data.redirect === '' )
-            return;
-
-          window.location.href = response.data.redirect
-        })
+          window.location.href = response.data.redirect;
+        });
       },
       isShippingChanged(property, value) {
-        if ( property === 'shipping' )
-          this.shippingChanged(value)
+        if (property === 'shipping') {
+          this.shippingChanged(value);
+        }
       },
       isPaymentChanged(property, value) {
-        if ( property === 'payment' )
-          this.paymentChanged(value)
+        if (property === 'payment') {
+          this.paymentChanged(value);
+        }
       },
       shippingChanged(value) {
-        if ( typeof value.cost !== 'undefined' )
-          this.shipping_total = value.cost
+        if (typeof value.cost !== 'undefined') {
+          this.shipping_total = value.cost;
+        }
 
-        this.updateCart()
+        this.updateCart();
       },
-      paymentChanged(value) {
-        this.updateCart()
+      paymentChanged() {
+        this.updateCart();
       },
       selectShipping(shipping) {
-        this.shipping = shipping.id
-        window.eventHub.$emit('selected', 'shipping', shipping)
+        this.shipping = shipping.id;
+        window.eventHub.$emit('selected', 'shipping', shipping);
       },
       select(property, value) {
-        this[property] = value
-        window.eventHub.$emit('selected', property, value)
+        this[property] = value;
+        window.eventHub.$emit('selected', property, value);
       },
       isSelected(property, value) {
-        return this[property] == value
-      }
+        return this[property] === value;
+      },
     },
 
     created() {
-      window.eventHub.$on('selected', this.isShippingChanged)
-      window.eventHub.$on('selected', this.isPaymentChanged)
+      window.eventHub.$on('selected', this.isShippingChanged);
+      window.eventHub.$on('selected', this.isPaymentChanged);
     },
 
     beforeDestroy() {
-      window.eventHub.$off('selected')
+      window.eventHub.$off('selected');
     },
 
     route: {
       canReuse() {
         return false;
-      }
-    }
-  }
+      },
+    },
+  };
 </script>

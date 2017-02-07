@@ -39,7 +39,7 @@
     }
   }
 
-  .available_variations {
+  .availableVariations {
     list-style-type: none;
     padding-left: 5px;
     padding-bottom: 5px;
@@ -70,7 +70,7 @@
     }
   }
 
-  .available_variations--table {
+  .availableVariations--table {
     .variation__image {
       width: 80px;
       img {
@@ -154,8 +154,8 @@
             </ladda>
 
             <!-- Variation selection: List -->
-            <ol class="available_variations" v-if="!settings.wyvern_theme_options_woocommerce.variations_table">
-              <li v-for="variation in product.available_variations" v-if="variation.variation_is_active && variation.variation_is_visible" @click="selectVariation(variation)" :class="[{ 'active' : variation.variation_id == selected_variation }, getAttributeClass(variation.attributes) ]">
+            <ol class="availableVariations" v-if="!settings.wyvern_theme_options_woocommerce.variations_table">
+              <li v-for="variation in product.availableVariations" v-if="variation.variation_is_active && variation.variation_is_visible" @click="selectVariation(variation)" :class="[{ 'active' : variation.variation_id == selectedVariation }, getAttributeClass(variation.attributes) ]">
                 <span v-for="(value, key) in variation.attributes" :class="[ key + '__item' ]">
                   <span class="variation__attribute__label">{{ getAttributeByKey(key) }}</span>
                   <span class="variation__attribute__value">{{ value }}</span>
@@ -166,7 +166,7 @@
             <!-- Attributes table -->
             <table class="table table-attributes">
               <tbody>
-                <tr v-for="(attribute, key) in product.attributes" v-if="attribute.length > 0 && isNotVariationAttribute(key, attribute, product.available_variations)">
+                <tr v-for="(attribute, key) in product.attributes" v-if="attribute.length > 0 && isNotVariationAttribute(key, attribute, product.availableVariations)">
                   <th class="text-left">{{ getAttributeByKey(key) }}</th>
                   <td>
                     <ul>
@@ -187,9 +187,9 @@
         </div>
 
         <!-- Variation selection: Table -->
-        <table class="table available_variations--table" v-if="settings.wyvern_theme_options_woocommerce.variations_table">
+        <table class="table availableVariations--table" v-if="settings.wyvern_theme_options_woocommerce.variations_table">
           <tbody>
-            <tr v-for="variation in product.available_variations" v-if="variation.variation_is_active && variation.variation_is_visible" :class="[{ 'active' : variation.variation_id == selected_variation }, getAttributeClass(variation.attributes) ]">
+            <tr v-for="variation in product.availableVariations" v-if="variation.variation_is_active && variation.variation_is_visible" :class="[{ 'active' : variation.variation_id == selectedVariation }, getAttributeClass(variation.attributes) ]">
               <td class="variation__image">
                 <img v-if="variation.image_src != ''" :src="variation.image_src">
                 <img  v-else
@@ -231,120 +231,120 @@
 </template>
 
 <script>
-  var querystring = require('querystring')
+  const querystring = require('querystring');
 
   export default {
     mounted() {
-      var vm = this
-      window.wyvern.http.get(wp.root + 'api/products/' + vm.$route.meta.postId).then((response) => {
-        vm.product = response.data
-        vm.product_gallery_preview = vm.product.images.large[0]
+      const vm = this;
+      window.wyvern.http.get(`${vm.wp.root}api/products/${vm.$route.meta.postId}`).then((response) => {
+        vm.product = response.data;
+        vm.product_gallery_preview = vm.product.images.large[0];
 
-        vm.product.available_variations.forEach((variation) => {
-          for ( let key in variation.attributes ) {
-            let attribute = variation.attributes[key]
-            if ( attribute == vm.product.default_attributes_variation[vm.getAttributeSlugByKey(key)] ) {
-              vm.selectVariation(variation)
+        vm.product.availableVariations.forEach((variation) => {
+          Object.keys(variation.attributes).forEach((key) => {
+            const attribute = variation.attributes[key];
+            if (attribute === vm.product.defaultAttributesVariation[vm.getAttributeSlugByKey(key)]) {
+              vm.selectVariation(variation);
             }
-          }
-        })
-      })
+          });
+        });
+      });
     },
 
     data() {
       return {
         product: {
-          id: 0
+          id: 0,
         },
         product_gallery_preview: null,
         quantity: 1,
         added: false,
         wp: window.wp,
         lang: window.lang,
-        selected_variation: null,
+        selectedVariation: null,
         variation: null,
-        settings: window.settings
-      }
+        settings: window.settings,
+      };
     },
 
     methods: {
       showGallery(url) {
-        this.product_gallery_preview = url
+        this.product_gallery_preview = url;
       },
       addToCart(product) {
-        let vm = this
-            this.added = false
+        const vm = this;
 
-        let query = querystring.stringify({
-          'variation_id' : this.selected_variation,
-          'quantity' : this.quantity,
-          'variation' : JSON.stringify(this.variation)
-        })
+        this.added = false;
 
-        window.wyvern.http.post(wp.root + 'api/cart/' + product.id + '/?' + query).then((response) => {
-          window.eventHub.$emit('cart-add', vm.quantity)
+        const query = querystring.stringify({
+          variation_id: this.selectedVariation,
+          quantity: this.quantity,
+          variation: JSON.stringify(this.variation),
+        });
+
+        window.wyvern.http.post(`${vm.wp.root}api/cart/${product.id}/?${query}`).then(() => {
+          window.eventHub.$emit('cart-add', vm.quantity);
           window.eventHub.$emit('message', {
             type: 'success',
-            message: 'Zboží bylo úspěšně přidáno do košíku'
-          })
-          this.added = true
-        })
+            message: 'Zboží bylo úspěšně přidáno do košíku',  // @todo: make lang
+          });
+          this.added = true;
+        });
       },
       addVariationToCart(product, variation) {
-        this.selectVariation(variation)
-        this.addToCart(product)
+        this.selectVariation(variation);
+        this.addToCart(product);
       },
-      selectVariation(selected_variation) {
-        this.selected_variation = selected_variation.variation_id
+      selectVariation(selectedVariation) {
+        this.selectedVariation = selectedVariation.variation_id;
 
-        let variation = {}
+        const variation = {};
 
-        for ( var key in selected_variation.attributes )
-        {
-          let item = selected_variation.attributes[key]
-          variation[this.getAttributeByKey(key)] = item
+        Object.keys(selectedVariation.attributes).forEach((key) => {
+          const item = selectedVariation.attributes[key];
+          variation[this.getAttributeByKey(key)] = item;
+        });
+
+        if (typeof selectedVariation.image_src !== 'undefined' && selectedVariation.image_src !== '') {
+          this.showGallery(selectedVariation.image_src);
         }
 
-        if ( typeof selected_variation.image_src !== 'undefined' && selected_variation.image_src !== '' )
-          this.showGallery(selected_variation.image_src)
+        if (typeof selectedVariation.display_price !== 'undefined') {
+          this.product.formatted_prices.regular = this.price(selectedVariation.display_price);
+        }
 
-        if ( typeof selected_variation.display_price !== 'undefined' )
-          this.product.formatted_prices.regular = this.price(selected_variation.display_price)
-
-        this.variation = variation
+        this.variation = variation;
       },
       getAttributeByKey(key) {
-        let attribute_key = key.replace('attribute_pa_', '')
-        return this.wp.attributes[attribute_key].label
+        const attributeKey = key.replace('attribute_pa_', '');
+        return this.wp.attributes[attributeKey].label;
       },
       getAttributeSlugByKey(key) {
-        return key.replace('attribute_pa_', '')
+        return key.replace('attribute_pa_', '');
       },
       getAttributeClass(attributes) {
-        return Object.keys(attributes).join(' variations__')
+        return Object.keys(attributes).join(' variations__');
       },
-      isNotVariationAttribute(main_attribute_key, attribute, available_variations) {
-        let variated_attributes = [],
-            attribute_woo_prefix = 'attribute_pa_'
+      isNotVariationAttribute(mainAttributeKey, attribute, availableVariations) {
+        const variatedAttributes = [];
+        const attributeWooPrefix = 'attribute_pa_';
 
-        for ( let key in available_variations )
-        {
-          let keys = Object.keys(available_variations[key].attributes)
-          for ( let i in keys )
-          {
-            let attribute_key = keys[i]
-            variated_attributes[attribute_key] = attribute_key
-          }
-        }
+        Object.keys(availableVariations).forEach((key) => {
+          const keys = Object.keys(availableVariations[key].attributes);
+          Object.keys(keys).forEach((i) => {
+            const attributeKey = keys[i];
+            variatedAttributes[attributeKey] = attributeKey;
+          });
+        });
 
-        return typeof variated_attributes[attribute_woo_prefix + main_attribute_key] === 'undefined'
-      }
+        return typeof variatedAttributes[attributeWooPrefix + mainAttributeKey] === 'undefined';
+      },
     },
 
     route: {
       canReuse() {
         return false;
-      }
-    }
-  }
+      },
+    },
+  };
 </script>

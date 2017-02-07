@@ -132,84 +132,82 @@
 </template>
 
 <script>
-  var querystring = require('querystring')
+  const querystring = require('querystring');
 
   export default {
 
     props: ['level'],
 
     mounted() {
-      this.getProducts()
+      this.getProducts();
     },
 
     methods: {
       getProducts() {
-        let vm = this
+        const vm = this;
 
-        let query = querystring.stringify( { filters: JSON.stringify(vm.filters) } )
+        const query = querystring.stringify({ filters: JSON.stringify(vm.filters) });
 
-        window.wyvern.http.get(wp.root + 'api/products/?' + query).then((response) => {
-          vm.products = response.data
-        })
+        window.wyvern.http.get(`${vm.wp.root}api/products/?${query}`).then((response) => {
+          vm.products = response.data;
+        });
       },
       addProduct(product) {
-
+        console.log(product);
       },
       showProduct(product) {
-        this.$router.push({path: product.permalink})
+        this.$router.push({ path: product.permalink });
       },
       setFilters(filters) {
-        this.filters = filters
+        this.filters = filters;
 
-        this.getProducts()
+        this.getProducts();
       },
       setFilter(name, value) {
-        this.filters[name] = value
+        this.filters[name] = value;
 
-        this.getProducts()
-      }
+        this.getProducts();
+      },
     },
 
     updated() {
-      let vm = this
+      const vm = this;
 
       // Mousemove gallery
-      if ( this.mousemove_gallery ) {
-        let images = document.querySelectorAll('.product__image')
+      if (this.mousemove_gallery) {
+        const images = document.querySelectorAll('.product__image');
 
         images.forEach((image) => {
-
           // Swap images on gallery mousemove
           image.addEventListener('mousemove', (event) => {
-            let bodyRect    = document.body.getBoundingClientRect(),
-                elemRect    = image.getBoundingClientRect(),
-                offset      = elemRect.left - bodyRect.left,
-                max         = elemRect.width + offset,
-                share       = (event.clientX - offset)/elemRect.width,
-                order       = Math.abs( parseInt(share / 0.25, 10) ),
-                imgs        = image.querySelectorAll('img')
+            const bodyRect = document.body.getBoundingClientRect();
+            const elemRect = image.getBoundingClientRect();
+            const offset = elemRect.left - bodyRect.left;
+            const share = (event.clientX - offset) / elemRect.width;
+            const order = Math.abs(parseInt(share / 0.25, 10));
+            const imgs = image.querySelectorAll('img');
 
-            if ( typeof imgs[order] !== 'undefined' ) {
+            if (typeof imgs[order] !== 'undefined') {
               imgs.forEach((img) => {
-                vm.addClass(img, 'hidden')
-              })
-              vm.removeClass(imgs[order], 'hidden')
+                vm.addClass(img, 'hidden');
+              });
+              vm.removeClass(imgs[order], 'hidden');
             }
-          })
+          });
 
           // Set #1 image on gallery mouseleave
-          image.addEventListener('mouseleave', (event) => {
-            let imgs        = image.querySelectorAll('img'),
-                order       = 0
+          image.addEventListener('mouseleave', () => {
+            const imgs = image.querySelectorAll('img');
+            const order = 0;
 
-            if ( imgs.length > 1 ) {
+            if (imgs.length > 1) {
               imgs.forEach((img) => {
-                vm.addClass(img, 'hidden')
-              })
-              vm.removeClass(imgs[order], 'hidden')
+                vm.addClass(img, 'hidden');
+              });
+              vm.removeClass(imgs[order], 'hidden');
             }
-          })
-        })
+          });
+        });
       }
     },
 
@@ -221,18 +219,19 @@
 
         mousemove_gallery: true,
 
-        lang: window.lang
-      }
+        lang: window.lang,
+        wp: window.wp,
+      };
     },
 
     created() {
-      window.eventHub.$on('filters-changed', this.setFilters)
-      window.eventHub.$on('filter-changed', this.setFilter)
+      window.eventHub.$on('filters-changed', this.setFilters);
+      window.eventHub.$on('filter-changed', this.setFilter);
     },
 
     beforeDestroy() {
-      window.eventHub.$off('filters-changed')
-      window.eventHub.$off('filter-changed')
-    }
-  }
+      window.eventHub.$off('filters-changed');
+      window.eventHub.$off('filter-changed');
+    },
+  };
 </script>

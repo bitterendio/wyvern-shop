@@ -243,20 +243,20 @@
 </template>
 
 <script>
-  var querystring = require('querystring');
+  const querystring = require('querystring');
 
-  var moment = require('moment');
+  const moment = require('moment');
   require('moment/locale/cs');
 
   export default {
     mounted() {
-      let vm = this
+      const vm = this;
 
-      if ( vm.logged_in ) {
-        vm.setUserData()
+      if (vm.logged_in) {
+        vm.setUserData();
       }
 
-      vm.setSocials()
+      vm.setSocials();
     },
 
     data() {
@@ -275,134 +275,138 @@
         last_name: null,
         socials: {
           facebook: null,
-          google: null
+          google: null,
         },
-        lang: window.lang
-      }
+        lang: window.lang,
+      };
     },
 
     computed: {
       logged_in() {
-        return typeof this.wp.customer_id !== 'undefined' && this.wp.customer_id != 0
-      }
+        return typeof this.wp.customerId !== 'undefined' && parseInt(this.wp.customerId, 10) !== 0;
+      },
     },
 
     methods: {
       login() {
-        let vm = this
+        const vm = this;
 
-        vm.authed = false
+        vm.authed = false;
 
-        window.wyvern.http.post(wp.root + 'api/login/', querystring.stringify({
+        window.wyvern.http.post(`${vm.wp.root}api/login/`, querystring.stringify({
           user_login: vm.user_login,
           user_password: vm.user_password,
-          remember: vm.remember
+          remember: vm.remember,
         })).then((response) => {
-          vm.authed = true
-          window.wp.customer_id = response.data.data.ID
-          vm.wp.customer_id = response.data.data.ID
-          vm.setUserData(response.data.data.ID)
+          vm.authed = true;
+          window.wp.customerId = response.data.data.ID;
+          vm.wp.customerId = response.data.data.ID;
+          vm.setUserData(response.data.data.ID);
 
-          if ( response.data.status == 'error' ) {
+          if (response.data.status === 'error') {
             window.eventHub.$emit('message', {
-              type   : 'error',
-              message: 'Login incorrect'
-            })
+              type: 'error',
+              message: 'Login incorrect', // @todo: make localized
+            });
           }
-        })
+        });
       },
       updateCustomer() {
-        let vm = this
+        const vm = this;
 
-        window.wyvern.http.post(wp.root + 'api/customer/' + vm.wp.customer_id + '/', querystring.stringify({
-          billing_address : JSON.stringify(vm.user.billing_address)
+        window.wyvern.http.post(`${vm.wp.root}api/customer/${vm.wp.customerId}/`, querystring.stringify({
+          billing_address: JSON.stringify(vm.user.billing_address),
         })).then((response) => {
-          console.log(response.data)
-        })
+          console.log(response.data);
+        });
       },
       getDate(date) {
-        return moment(date).format('LL')
+        return moment(date).format('LL');
       },
       openOrder(order) {
-        let vm = this
+        const vm = this;
 
-        if ( vm.open == order.id ) {
-          vm.open = 0
-          return
+        if (parseInt(vm.open, 10) === parseInt(order.id, 10)) {
+          vm.open = 0;
+          return;
         }
 
-        vm.open = order.id
-        vm.order = {}
+        vm.open = order.id;
+        vm.order = {};
 
-        window.wyvern.http.get(wp.root + 'api/order/?order_id=' + order.id).then((response) => {
-          vm.order = response.data
-        })
+        window.wyvern.http.get(`${vm.wp.root}api/order/?order_id=${order.id}`).then((response) => {
+          vm.order = response.data;
+        });
       },
       cancelOrder(order) {
-        let vm = this
-        window.wyvern.http.delete(wp.root + 'api/order/?order_id=' + order.id).then((response) => {
-          vm.open = 0
-        })
+        const vm = this;
+        window.wyvern.http.delete(`${vm.wp.root}api/order/?order_id=${order.id}`).then(() => {
+          vm.open = 0;
+        });
       },
-      setUserData(customer_id) {
-        let vm = this
+      setUserData(customerId) {
+        const vm = this;
+        let localCustomerId = customerId;
 
-        if ( typeof customer_id === 'undefined' )
-          customer_id = vm.wp.customer_id
+        if (typeof customerId === 'undefined') {
+          localCustomerId = vm.wp.customerId;
+        }
 
-        if ( typeof customer_id === 'undefined' )
-          return
+        if (typeof localCustomerId === 'undefined') {
+          return;
+        }
 
-        if ( customer_id === 0 )
-          return
+        if (localCustomerId === 0) {
+          return;
+        }
 
-        window.wyvern.http.get(wp.root + 'api/customer/' + customer_id + '/').then((response) => {
-          vm.user = response.data
-        })
+        window.wyvern.http.get(`${vm.wp.root}api/customer/${localCustomerId}/`).then((response) => {
+          vm.user = response.data;
+        });
       },
       logout() {
-        let vm = this
+        const vm = this;
 
-        window.wyvern.http.get(wp.root + 'api/logout/').then((response) => {
-          window.wp.customer_id = 0
-          vm.wp.customer_id = 0
-        })
+        window.wyvern.http.get(`${vm.wp.root}api/logout/`).then(() => {
+          window.wp.customerId = 0;
+          vm.wp.customerId = 0;
+        });
       },
       register() {
-        let vm = this
+        const vm = this;
 
-        window.wyvern.http.post(wp.root + 'api/register/', querystring.stringify({
+        window.wyvern.http.post(`${vm.wp.root}api/register/`, querystring.stringify({
           email: vm.user_login,
           password: vm.user_password,
           first_name: vm.first_name,
-          last_name: vm.last_name
+          last_name: vm.last_name,
         })).then((response) => {
-          vm.authed = true
-          window.wp.customer_id = response.data.user_id
-          vm.wp.customer_id = response.data.user_id
-          vm.setUserData(response.data.user_id)
-        })
+          vm.authed = true;
+          window.wp.customerId = response.data.user_id;
+          vm.wp.customerId = response.data.user_id;
+          vm.setUserData(response.data.user_id);
+        });
       },
       setSocials() {
-        let vm = this
-        window.wyvern.http.get(wp.root + 'api/socials/').then((response) => {
-          vm.socials.facebook = response.data.facebook[0]
-          vm.socials.google = response.data.google[0]
-        })
+        const vm = this;
+        window.wyvern.http.get(`${vm.wp.root}api/socials/`).then((response) => {
+          vm.socials.facebook = response.data.facebook[0];
+          vm.socials.google = response.data.google[0];
+        });
       },
       socialLogin(provider) {
-        window.location.href = this.socials[provider]
+        window.location.href = this.socials[provider];
       },
       password() {
-        let vm = this
-        window.wyvern.http.get(wp.root + 'api/request-password/?' + querystring.stringify({ user_email: vm.user_login })).then((response) => {
-          vm.authed = true
-        })
-      }
+        const vm = this;
+        window.wyvern.http.get(`${vm.wp.root}api/request-password/?${querystring.stringify({ user_email: vm.user_login })}`).then(() => {
+          vm.authed = true;
+        });
+      },
     },
 
     route: {
 
-    }
-  }
+    },
+  };
 </script>

@@ -131,40 +131,40 @@
 </template>
 
 <script>
-  let Headroom = require('headroom.js')
+  const Headroom = require('headroom.js');
 
   export default {
     mounted() {
-      let vm = this
+      const vm = this;
       this.getMenuLocation('primary', (response) => {
-        vm.menu = response
-      })
-      vm.addClass(document.querySelector('body'), 'pinned')
+        vm.menu = response;
+      });
+      vm.addClass(document.querySelector('body'), 'pinned');
 
       // Set default filters
-      let filters = {}
-      for ( let key in this.wp.attributes ) {
-        filters[key] = null
-      }
-      vm.$set(vm, 'filters', filters)
+      const filters = {};
+      Object.keys(this.wp.attributes).forEach((key) => {
+        filters[key] = null;
+      });
+      vm.$set(vm, 'filters', filters);
 
-      var headerElement = document.querySelector('.theme-header')
-      var headroom  = new Headroom(headerElement, {
+      const headerElement = document.querySelector('.theme-header');
+      const headroom = new Headroom(headerElement, {
         offset: 205,
         tolerance: 5,
         classes: {
-          initial: "animated",
-          pinned: "slideDown",
-          unpinned: "slideUp"
+          initial: 'animated',
+          pinned: 'slideDown',
+          unpinned: 'slideUp',
         },
-        onPin : function() {
-          vm.addClass(document.querySelector('body'), 'pinned')
+        onPin() {
+          vm.addClass(document.querySelector('body'), 'pinned');
         },
-        onUnpin : function() {
-          vm.removeClass(document.querySelector('body'), 'pinned')
-        }
-      })
-      headroom.init()
+        onUnpin() {
+          vm.removeClass(document.querySelector('body'), 'pinned');
+        },
+      });
+      headroom.init();
     },
 
     data() {
@@ -173,66 +173,69 @@
         menu: [],
         show_filters: false,
         filters: {},
-        lang: window.lang
-      }
+        lang: window.lang,
+      };
     },
 
     methods: {
       toggleFilters(state) {
-        if ( typeof state === 'undefined' )
-          state = !this.show_filters
+        let localState = state;
 
-        this.show_filters = state
+        if (typeof state === 'undefined') {
+          localState = !this.show_filters;
+        }
+
+        this.show_filters = localState;
       },
       filterTitle(title) {
-        if ( title.indexOf('Nákupní košík') > -1 ) {
-          return '(' + this.wp.cart_total + ') Nákupní košík'
+        if (title.indexOf('Nákupní košík') > -1) {
+          return `(${this.wp.cartTotal}) Nákupní košík`;
         }
-        return title
+        return title;
       },
       cartAdd(number) {
-        this.wp.cart_total = parseInt(this.wp.cart_total) + parseInt(number)
+        this.wp.cartTotal = parseInt(this.wp.cartTotal, 10) + parseInt(number, 10);
       },
       cartEmpty() {
-        this.wp.cart_total = 0
+        this.wp.cartTotal = 0;
       },
-      cartUpdate(cart, cart_total) {
-        this.wp.cart_total = cart_total
+      cartUpdate(cart, cartTotal) {
+        this.wp.cartTotal = cartTotal;
       },
       clearFilters() {
-        window.eventHub.$emit('filters-changed', {})
-      }
+        window.eventHub.$emit('filters-changed', {});
+      },
     },
 
     watch: {
-      'show_filters' (value) {
-        if ( value ) {
-          this.addClass(document.querySelector('body'), 'filtering')
+      show_filters(value) {
+        if (value) {
+          this.addClass(document.querySelector('body'), 'filtering');
         } else {
-          this.removeClass(document.querySelector('body'), 'filtering')
+          this.removeClass(document.querySelector('body'), 'filtering');
         }
       },
-      'filters': {
+      filters: {
         handler(value) {
-          window.eventHub.$emit('filters-changed', value)
+          window.eventHub.$emit('filters-changed', value);
         },
-        deep: true
-      }
+        deep: true,
+      },
     },
 
     // Create listeners
     created() {
-      window.eventHub.$on('cart-add', this.cartAdd)
-      window.eventHub.$on('empty-cart', this.cartEmpty)
-      window.eventHub.$on('update-cart', this.cartUpdate)
+      window.eventHub.$on('cart-add', this.cartAdd);
+      window.eventHub.$on('empty-cart', this.cartEmpty);
+      window.eventHub.$on('update-cart', this.cartUpdate);
     },
 
     // It's good to clean up event listeners before
     // a component is destroyed.
     beforeDestroy() {
-      window.eventHub.$off('cart-add')
-      window.eventHub.$off('empty-cart')
-      window.eventHub.$off('update-cart')
+      window.eventHub.$off('cart-add');
+      window.eventHub.$off('empty-cart');
+      window.eventHub.$off('update-cart');
     },
-  }
+  };
 </script>

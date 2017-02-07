@@ -102,8 +102,9 @@
     props: ['attribute', 'multiple'],
 
     mounted() {
-      if ( typeof this.attribute.label !== 'undefined' )
-        this.current_label = this.attribute.label
+      if (typeof this.attribute.label !== 'undefined') {
+        this.current_label = this.attribute.label;
+      }
     },
 
     data() {
@@ -113,70 +114,77 @@
         values: [],
 
         show_values: false,
-        lang: window.lang
-      }
+        lang: window.lang,
+      };
     },
 
     computed: {
       current_value() {
-        let vm = this,
-            output = []
+        const vm = this;
+        const output = [];
         this.values.forEach((item) => {
-          // @todo: IE
-          let index = vm.attribute.values.findIndex(value => value.term_id === item)
+          const index = vm.attribute.values.findIndex(value => value.term_id === item);
+          output.push(vm.attribute.values[index].name);
+        });
 
-          output.push(vm.attribute.values[index].name)
-        })
+        if (output.length === 0) {
+          return this.lang.all;
+        }
 
-        if ( output.length == 0 )
-          return this.lang.all
-
-        return output.join(', ')
-      }
+        return output.join(', ');
+      },
     },
 
     methods: {
       showValues(state) {
-        if ( typeof state === 'undefined' )
-          state = !this.show_values
+        let localState = state;
+        if (typeof state === 'undefined') {
+          localState = !this.show_values;
+        }
 
-        this.show_values = state
+        this.show_values = localState;
       },
       selectShown(uid, state) {
-        if ( this._uid !== uid )
-          this.show_values = false
+        if (this._uid !== uid) {
+          this.show_values = false;
+        }
+        if (typeof state !== 'undefined') {
+          // @todo: custom logic
+        }
       },
       select(value) {
-        let index = this.values.indexOf(value)
+        const index = this.values.indexOf(value);
 
-        if ( index > -1 )
-          this.values.splice(index, 1)
-        else
-          this.values.push(value)
-      }
+        if (index > -1) {
+          this.values.splice(index, 1);
+        } else {
+          this.values.push(value);
+        }
+      },
     },
 
     watch: {
-      'show_values'(value) {
-        if ( value )
-          window.eventHub.$emit('select-values-shown', this._uid, value)
-        else
-          window.eventHub.$emit('select-values-hidden', this._uid, value)
+      show_values(value) {
+        if (value) {
+          window.eventHub.$emit('select-values-shown', this._uid, value);
+        } else {
+          window.eventHub.$emit('select-values-hidden', this._uid, value);
+        }
       },
-      'values'(value) {
-        this.$emit('input', this.values)
-      }
+      values(value) {
+        this.$emit('input', this.values, value);
+      },
     },
 
     // Create listeners
     created() {
-      window.eventHub.$on('select-values-shown', this.selectShown)
+      window.eventHub.$on('select-values-shown', this.selectShown);
     },
 
     // It's good to clean up event listeners before
     // a component is destroyed.
     beforeDestroy() {
-      window.eventHub.$off('select-values-shown')
+      window.eventHub.$off('select-values-shown');
     },
-  }
+  };
 </script>
