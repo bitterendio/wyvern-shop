@@ -14,33 +14,33 @@
           <h2>{{ lang.account_general }}</h2>
 
           <div v-if="user.billing_address">
-            <div class="form-group">
+            <div class="form-group" :class="{'has--input': user.billing_address.first_name !== ''}">
               <label for="first_name" class="control-label">{{ lang.first_name }}</label>
               <input type="text" id="first_name" class="form-control" v-model="user.billing_address.first_name" :placeholder="lang.first_name">
             </div>
 
-            <div class="form-group">
+            <div class="form-group" :class="{'has--input': user.billing_address.last_name !== ''}">
               <label for="last_name" class="control-label">{{ lang.last_name }}</label>
               <input type="text" id="last_name" class="form-control" v-model="user.billing_address.last_name" :placeholder="lang.last_name">
             </div>
 
-            <div class="form-group">
+            <div class="form-group" :class="{'has--input': user.billing_address.phone !== ''}">
               <label for="phone" class="control-label">{{ lang.phone }}</label>
               <input type="text" id="phone" class="form-control" v-model="user.billing_address.phone" :placeholder="lang.phone">
             </div>
 
-            <div class="form-group">
+            <div class="form-group" :class="{'has--input': user.billing_address.email !== ''}">
               <label for="email" class="control-label">{{ lang.email }}</label>
               <input type="text" id="email" class="form-control" v-model="user.billing_address.email" :placeholder="lang.email">
             </div>
 
-            <div class="form-group">
+            <div class="form-group" :class="{'has--input': user.billing_address.address !== ''}">
               <label for="address" class="control-label">{{ lang.address }}</label>
               <textarea id="address" class="form-control" v-model="user.billing_address.address" :placeholder="lang.aaddress"></textarea>
             </div>
 
-            <div class="form-group">
-              <button type="button" class="btn" @click="updateCustomer">
+            <div class="form-group" >
+              <button type="button" class="btn btn--primary btn--lg btn--block" @click="updateCustomer">
                 {{ lang.update }}
               </button>
             </div>
@@ -316,9 +316,7 @@
 
         window.wyvern.http.post(`${vm.wp.root}api/customer/${vm.wp.customerId}/`, querystring.stringify({
           billing_address: JSON.stringify(vm.user.billing_address),
-        })).then((response) => {
-          console.log(response.data);
-        });
+        })).then(() => {});
       },
       getDate(date) {
         return moment(date).format('LL');

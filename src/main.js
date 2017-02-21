@@ -6,6 +6,7 @@ import Cart from './cart.vue';
 import Checkout from './checkout.vue';
 import Account from './account.vue';
 import Product from './product.vue';
+import Home from './home.vue';
 import Woocommerce from './levels/woocommerce.vue';
 import Select from './components/select.vue';
 import NumberComponent from './components/number.vue';
@@ -19,6 +20,7 @@ Vue.component('Cart', Cart);
 Vue.component('Checkout', Checkout);
 Vue.component('Account', Account);
 Vue.component('Product', Product);
+Vue.component('Home', Home);
 Vue.component('woocommerce', Woocommerce);
 Vue.component('select-component', Select);
 Vue.component('number-component', NumberComponent);
@@ -26,6 +28,7 @@ Vue.component('ladda', Ladda);
 Vue.component('sidebar', Sidebar);
 window.wp.templates.push('Checkout');
 window.wp.templates.push('Account');
+window.wp.templates.push('Home');
 
 routes.add({
   path: `${window.wp.base_path}checkout/pay/:id/`,
@@ -59,6 +62,18 @@ routes.add({
   },
 });
 
+// @todo: meta information are artificial, find a way to not specify them
+routes.add({
+  path: `${window.wp.base_path}:attributeName/:attributeValue`,
+  component: Home,
+  name: 'Filter',
+  meta: {
+    name: 'Home',
+    postId: 5,
+  },
+  props: true,
+});
+
 routes.refresh();
 
 function formatMoney(input, decimals, decimalSeparator, thousandSeparator) {
@@ -88,14 +103,14 @@ Vue.mixin({
 
       switch (window.wp.price_format) {
         case '%2$s %1$s':
-          return `${money}&nbsp;${window.wp.currency_symbol}`;
+          return `${money} ${window.wp.currency_symbol}`;
         case '%2$s%1$s':
           return `${money}${window.wp.currency_symbol}`;
         case '%1$s%2$s':
           return `${window.wp.currency_symbol}${money}`;
         case '%1$s %2$s':
         default:
-          return `${window.wp.currency_symbol}&nbsp;${money}`;
+          return `${window.wp.currency_symbol} ${money}`;
       }
     },
   },
@@ -106,6 +121,9 @@ const router = new VueRouter({
   mode: 'history',
   routes: routes.get(),
 });
+
+// Event bus
+const bus = new Vue({});
 
 // Start app
 new Vue({ // eslint-disable-line no-new
@@ -126,6 +144,7 @@ new Vue({ // eslint-disable-line no-new
 
   data() {
     return {
+      bus,
       messages: [],
     };
   },
@@ -188,7 +207,7 @@ new Vue({ // eslint-disable-line no-new
     // Changed route
     $route(to, from) {
       window.eventHub.$emit('changed-route', to, from);
-      window.eventHub.$emit('filters-changed', {});
+      // window.eventHub.$emit('filters-changed', {});
     },
   },
 });

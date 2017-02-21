@@ -9,10 +9,16 @@ module.exports = {
   env: {
     browser: true,
   },
-  extends: 'airbnb-base',
+  globals: {
+    document: false,
+    navigator: false,
+    window: false
+  },
+  extends: ['vue', 'airbnb-base'],
   // required to lint *.vue files
   plugins: [
-    'html'
+      'vue',
+      'html'
   ],
   // check if imports actually resolve
   'settings': {
@@ -24,6 +30,7 @@ module.exports = {
   },
   // add your custom rules here
   'rules': {
+    'vue/jsx-uses-vars': 2,
     // don't require .vue extension when importing
     'import/extensions': ['error', 'always', {
       'js': 'never',

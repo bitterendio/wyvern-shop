@@ -4,6 +4,28 @@
 
   $columns: 3;
 
+  .loadable {
+    transition: opacity 0.3s;
+  }
+
+  .loading {
+    opacity: 0.4;
+  }
+
+  .products {
+    position: relative;
+    .loader-wrapper {
+      position: absolute;
+      top: 100px;
+      left: 50%;
+      margin-left: -100px;
+      width: 200px;
+      text-align: center;
+      height: 4em;
+      z-index: 2;
+    }
+  }
+
   .products {
     display: flex;
     flex-wrap: wrap;
@@ -17,6 +39,10 @@
     width: 100%/$columns;
     max-width: 100%/$columns;
     min-width: 100%/$columns;
+  }
+
+  .product--block {
+    display: block;
   }
 
   .product__image__wrapper {
@@ -85,7 +111,11 @@
 <template>
   <div class="products catalog">
 
-    <div v-for="product in products" class="product" @click="showProduct(product)" v-if="product.attributes">
+    <div class="loader-wrapper" :class="{'hidden':!loading}">
+      <div class="loader">{{ lang.loading }}</div>
+    </div>
+
+    <router-link :to="{ path: url2Slug(product.permalink) }" v-for="product in products" class="product product--block loadable" :class="{'loading':loading}" v-if="product.attributes">
 
       <ul class="colors" v-if="product.attributes.barva">
         <li v-for="barva in product.attributes.barva" :style="{ backgroundColor: barva.barva }" class="color">
@@ -94,7 +124,7 @@
       </ul>
 
       <div class="product__image__wrapper">
-        <div class="product__image" :data-product_id="product.id">
+        <div v-if="product.images.thumbnail !== false" class="product__image" :data-product_id="product.id">
           <img  :src="product.images.product_image[0]"
                 :width="product.images.product_image[1]"
                 :height="product.images.product_image[2]"
@@ -105,6 +135,10 @@
                 :hight="image[2]"
                 :alt="product.title"
                 class="hidden">
+        </div>
+        <div v-else class="product__image" :data-product_id="product.id">
+          <img  :src="wp.wc_placeholder"
+                :alt="product.title">
         </div>
       </div>
 
@@ -126,7 +160,7 @@
         {{ lang.add_to_cart }}
       </button>
 
-    </div>
+    </router-link>
 
   </div>
 </template>
@@ -136,24 +170,23 @@
 
   export default {
 
-    props: ['level'],
+    props: ['level', 'object'],
 
     mounted() {
+      this.filters = this.object.filters;
       this.getProducts();
     },
 
     methods: {
       getProducts() {
-        const vm = this;
-
-        const query = querystring.stringify({ filters: JSON.stringify(vm.filters) });
-
-        window.wyvern.http.get(`${vm.wp.root}api/products/?${query}`).then((response) => {
-          vm.products = response.data;
+        const query = querystring.stringify({ filters: JSON.stringify(this.filters) });
+        this.loading = true;
+        window.wyvern.http.get(`${this.wp.root}api/products/?${query}`).then((response) => {
+          this.products = response.data;
+          this.loading = false;
         });
       },
-      addProduct(product) {
-        console.log(product);
+      addProduct() {
       },
       showProduct(product) {
         this.$router.push({ path: product.permalink });
@@ -165,7 +198,7 @@
       },
       setFilter(name, value) {
         this.filters[name] = value;
-
+        console.log('here', name, value);
         this.getProducts();
       },
     },
@@ -221,17 +254,20 @@
 
         lang: window.lang,
         wp: window.wp,
+        loading: true,
       };
     },
 
     created() {
       window.eventHub.$on('filters-changed', this.setFilters);
       window.eventHub.$on('filter-changed', this.setFilter);
+      window.eventHub.$on('filter-set', this.setFilter);
     },
 
     beforeDestroy() {
-      window.eventHub.$off('filters-changed');
-      window.eventHub.$off('filter-changed');
+      window.eventHub.$off('filters-changed', this.setFilters);
+      window.eventHub.$off('filter-changed', this.setFilter);
+      window.eventHub.$off('filter-set', this.setFilter);
     },
   };
 </script>

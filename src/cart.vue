@@ -11,7 +11,7 @@
     }
   }
 
-  .table__row--total {
+  .table__row--total, .item__row__total {
     line-height: 60px;
     font-size: 12px;
     color: #aaa;
@@ -36,7 +36,9 @@
     & > .secondary {
       max-width: 590px;
       padding-left: 40px;
-      .column-title {}
+      .column-title {
+        visibility: hidden;
+      }
     }
   }
 </style>
@@ -77,8 +79,8 @@
                     <number-component v-model="item.quantity" :default_value="item.quantity" @valuechange="updateQuantity(key, item.quantity)"></number-component>
                   </td>
                   <td>
-                    <button type="button" @click="updateQuantity(key, 0)" :title="lang.remove_from_cart">
-                      X
+                    <button type="button" class="btn btn__remove" @click="updateQuantity(key, 0)" :title="lang.remove_from_cart">
+                      <i class="icon icon--close"></i>
                     </button>
                   </td>
                   <td class="item__row__total">
@@ -115,7 +117,7 @@
             </table>
 
             <button type="button" @click="emptyCart()" class="btn btn__empty_cart">
-              {{ lang.empty_cart }}
+              <i class="icon icon--close"></i> {{ lang.empty_cart }}
             </button>
 
             <div class="entry-content" v-html="page.content.rendered">
@@ -127,27 +129,27 @@
 
             <h1 class="column-title">{{ lang.billing_address }}</h1>
 
-            <div class="form-group">
+            <div class="form-group" :class="{'has--input': billing_address.name !== ''}">
               <label for="billing_name" class="control-label">{{ lang.first_name_and_last_name }}</label>
               <input type="text" id="billing_name" v-model="billing_address.name" class="form-control" :placeholder="lang.first_name_and_last_name">
             </div>
 
-            <div class="form-group">
+            <div class="form-group" :class="{'has--input': billing_address.phone !== ''}">
               <label for="phone" class="control-label">{{ lang.phone }}</label>
               <input type="text" id="phone" v-model="billing_address.phone" class="form-control" :placeholder="lang.phone">
             </div>
 
-            <div class="form-group">
+            <div class="form-group" :class="{'has--input': billing_address.email !== ''}">
               <label for="email" class="control-label">{{ lang.email }}</label>
               <input type="text" id="email" v-model="billing_address.email" class="form-control" :placeholder="lang.email">
             </div>
 
-            <div class="form-group">
+            <div class="form-group" :class="{'has--input': billing_address.address !== ''}">
               <label for="address" class="control-label">{{ lang.address }}</label>
               <textarea rows="2" id="address" v-model="billing_address.address" class="form-control" :placeholder="lang.address" autocorrect="off" spellcheck="false"></textarea>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" :class="{'has--input': note !== '' && note !== null}">
               <label for="note" class="control-label">{{ lang.note }}</label>
               <textarea rows="2" id="note" v-model="note" class="form-control" :placeholder="lang.note"></textarea>
             </div>
@@ -160,12 +162,12 @@
             </div>
 
             <div v-show="ship_to_different_address">
-              <div class="form-group">
+              <div class="form-group" :class="{'has--input': shipping_address.name !== ''}">
                 <label for="shipping_name" class="control-label">{{ lang.first_name_and_last_name }}</label>
                 <input type="text" id="shipping_name" v-model="shipping_address.name" class="form-control" :placeholder="lang.first_name_and_last_name">
               </div>
 
-              <div class="form-group">
+              <div class="form-group" :class="{'has--input': shipping_address.address !== ''}">
                 <label for="shipping_address" class="control-label">{{ lang.address }}</label>
                 <textarea rows="2" id="shipping_address" v-model="shipping_address.address" class="form-control" :placeholder="lang.address" autocorrect="off" spellcheck="false"></textarea>
               </div>
@@ -194,8 +196,10 @@
               </div>
             </div>
 
+            <p v-html="__('accept_terms', {'terms_link': '/terms'})" class="control-label"></p>
+
             <div class="form-group">
-              <button type="button" @click="order()">
+              <button type="button" @click="order()" class="btn btn--block btn--lg btn--primary">
                 {{ lang.place_order }}
               </button>
             </div>
@@ -232,11 +236,17 @@
 
       this.updateCart();
 
-      Object.keys(vm.wp.wc_user.billing).forEach((key) => {
-        if (typeof vm.wp.wc_user.billing[key] !== 'undefined' && vm.wp.wc_user.billing[key] !== false) {
-          vm.billing_address[key] = vm.wp.wc_user.billing[key];
-        }
-      });
+      const wpUserBiling = vm.wp.wc_user.billing;
+      vm.billing_address = Object.keys(wpUserBiling).reduce(
+          (billingAddress, key) => {
+            if (typeof wpUserBiling[key] !== 'undefined' && wpUserBiling[key] !== false) {
+              vm.billing_address[key] = vm.wp.wc_user.billing[key];
+              return Object.assign({}, billingAddress, { [key]: wpUserBiling[key] });
+            }
+            return billingAddress;
+          },
+          {},
+      );
 
       if ((typeof vm.wp.wc_user.billing.first_name !== 'undefined' || typeof vm.wp.wc_user.billing.last_name !== 'undefined') && vm.wp.wc_user.billing.first_name !== false && vm.wp.wc_user.billing.last_name !== false) {
         vm.billing_address.name = `${vm.wp.wc_user.billing.first_name} ${vm.wp.wc_user.billing.last_name}`;

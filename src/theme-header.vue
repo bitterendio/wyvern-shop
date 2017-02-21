@@ -7,8 +7,7 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    z-index: 100;
+    width: 100vw;
   }
 
   .page.content {
@@ -146,6 +145,13 @@
       Object.keys(this.wp.attributes).forEach((key) => {
         filters[key] = null;
       });
+
+      // Get route filters
+      if (typeof this.$route.params.attributeName !== 'undefined' && this.$route.params.attributeValue !== 'undefined') {
+        filters[this.$route.params.attributeName] = this.$route.params.attributeValue;
+        window.eventHub.$emit('filter-set', this.$route.params.attributeName, this.$route.params.attributeValue);
+      }
+
       vm.$set(vm, 'filters', filters);
 
       const headerElement = document.querySelector('.theme-header');
@@ -189,7 +195,11 @@
       },
       filterTitle(title) {
         if (title.indexOf('Nákupní košík') > -1) {
-          return `(${this.wp.cartTotal}) Nákupní košík`;
+          let numberOfProducts = 0;
+          if (typeof this.wp.cartTotal !== 'undefined') {
+            numberOfProducts = parseInt(this.wp.cartTotal, 10);
+          }
+          return `(${numberOfProducts}) Nákupní košík`;
         }
         return title;
       },
@@ -203,7 +213,9 @@
         this.wp.cartTotal = cartTotal;
       },
       clearFilters() {
+        console.log('clearFilters');
         window.eventHub.$emit('filters-changed', {});
+        window.eventHub.$emit('site-title-click');
       },
     },
 
@@ -233,9 +245,9 @@
     // It's good to clean up event listeners before
     // a component is destroyed.
     beforeDestroy() {
-      window.eventHub.$off('cart-add');
-      window.eventHub.$off('empty-cart');
-      window.eventHub.$off('update-cart');
+      window.eventHub.$off('cart-add', this.cartAdd);
+      window.eventHub.$off('empty-cart', this.cartEmpty);
+      window.eventHub.$off('update-cart', this.cartUpdate);
     },
   };
 </script>

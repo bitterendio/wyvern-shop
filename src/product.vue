@@ -9,11 +9,15 @@
   }
 
   .product__detail--left {
-
+    order: 2;
   }
 
   .product__detail--right {
-    max-width: $sidebar-width;
+    order: 1;
+    max-width: $sidebar-width * 2;
+    .price {
+      font-size: 24px;
+    }
   }
 
   .product__gallery__preview {
@@ -32,7 +36,7 @@
     cursor: pointer;
     flex: 1;
     max-width: 25%;
-    border: 2px solid $link-color;
+    /* border: 2px solid $link-color; */
     text-align: center;
     &:hover {
       border-color: $hover-color;
@@ -43,6 +47,8 @@
     list-style-type: none;
     padding-left: 5px;
     padding-bottom: 5px;
+    clear: both;
+    overflow: hidden;
     li {
       cursor: pointer;
       display: block;
@@ -94,9 +100,25 @@
   }
 
   .table-attributes {
+    margin-top: 20px;
     td, th {
       vertical-align: top;
-      padding-top: 0;
+      padding: 5px 10px;
+    }
+    th {
+      padding-left: 0;
+    }
+    ul {
+      margin: 0;
+      padding: 0;
+      list-style-type: none;
+    }
+  }
+
+  .product__gallery__item--placeholder {
+    img {
+      max-width: 100%;
+      height: auto;
     }
   }
 </style>
@@ -114,18 +136,26 @@
 
           <div class="product__detail--left">
 
-            <div class="product__gallery__preview">
+            <div class="product__gallery__preview" v-if="product.images.large !== false">
               <img :src="product_gallery_preview"
                     :width="product.images.large[1]"
                     :height="product.images.large[2]"
                     :alt="product.title">
             </div>
+            <div class="product__gallery__preview product__gallery__preview--placeholder" v-else>
+                <img  :src="wp.wc_placeholder"
+                      :alt="product.title">
+            </div>
 
             <div class="product__gallery__wrapper">
-              <div @click="showGallery(product.images.full[0])" class="product__gallery__item">
+              <div  v-if="product.images.full !== false" @click="showGallery(product.images.full[0])" class="product__gallery__item">
                 <img  :src="product.images.thumbnail[0]"
                       :width="product.images.thumbnail[1]"
                       :height="product.images.thumbnail[2]"
+                      :alt="product.title">
+              </div>
+              <div v-else  class="product__gallery__item product__gallery__item--placeholder">
+                <img  :src="wp.wc_placeholder"
                       :alt="product.title">
               </div>
 
@@ -240,14 +270,17 @@
         vm.product = response.data;
         vm.product_gallery_preview = vm.product.images.large[0];
 
-        vm.product.availableVariations.forEach((variation) => {
-          Object.keys(variation.attributes).forEach((key) => {
-            const attribute = variation.attributes[key];
-            if (attribute === vm.product.defaultAttributesVariation[vm.getAttributeSlugByKey(key)]) {
-              vm.selectVariation(variation);
-            }
+        if (typeof vm.product.availableVariations !== 'undefined') {
+          vm.product.availableVariations.forEach((variation) => {
+            Object.keys(variation.attributes).forEach((key) => {
+              const attribute = variation.attributes[key];
+              const variated = vm.product.defaultAttributesVariation[vm.getAttributeSlugByKey(key)];
+              if (attribute === variated) {
+                vm.selectVariation(variation);
+              }
+            });
           });
-        });
+        }
       });
     },
 
@@ -329,13 +362,15 @@
         const variatedAttributes = [];
         const attributeWooPrefix = 'attribute_pa_';
 
-        Object.keys(availableVariations).forEach((key) => {
-          const keys = Object.keys(availableVariations[key].attributes);
-          Object.keys(keys).forEach((i) => {
-            const attributeKey = keys[i];
-            variatedAttributes[attributeKey] = attributeKey;
+        if (typeof availableVariations !== 'undefined') {
+          Object.keys(availableVariations).forEach((key) => {
+            const keys = Object.keys(availableVariations[key].attributes);
+            Object.keys(keys).forEach((i) => {
+              const attributeKey = keys[i];
+              variatedAttributes[attributeKey] = attributeKey;
+            });
           });
-        });
+        }
 
         return typeof variatedAttributes[attributeWooPrefix + mainAttributeKey] === 'undefined';
       },

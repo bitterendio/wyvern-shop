@@ -6,7 +6,7 @@
   <div class="sidebar animated animated--all">
     <ul class="list-nav">
       <li v-for="value in wp.attributes.druh.values">
-        <a @click="selectFilter('druh', value.term_id)" :class="{ 'active' : isSelected('druh', value.term_id) }">
+        <a @click="selectSingleFilter('druh', value.slug)" :class="{ 'active' : isSelected('druh', value.term_id) }">
           {{ value.name }}
         </a>
       </li>
@@ -51,11 +51,15 @@
       selectFilter(name, value) {
         window.eventHub.$emit('filter-changed', name, value);
       },
+      selectSingleFilter(attributeName, attributeValue) {
+        this.$router.push({ name: 'Filter', params: { attributeName, attributeValue } });
+      },
       setFilters(filters) {
         this.filters = filters;
       },
       setFilter(name, value) {
         this.filters[name] = value;
+        this.$router.push('/');
       },
       isSelected(name, value) {
         if (typeof this.filters === 'undefined') {
@@ -89,8 +93,8 @@
     },
 
     beforeDestroy() {
-      window.eventHub.$off('filters-changed');
-      window.eventHub.$off('filter-changed');
+      window.eventHub.$off('filters-changed', this.setFilters);
+      window.eventHub.$off('filter-changed', this.setFilter);
     },
   };
 </script>

@@ -79,12 +79,9 @@
       },
     },
 
-    // Create listeners
     created() {
     },
 
-    // It's good to clean up event listeners before
-    // a component is destroyed.
     beforeDestroy() {
     },
   };

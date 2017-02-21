@@ -76,7 +76,10 @@ msgstr ""
 msgid "Sign in with"
 msgstr ""
 
-msgid "Sign up with""or"
+msgid "Sign up with"
+msgstr ""
+
+msgid "or"
 msgstr ""
 
 msgid "Username or E-mail"
@@ -155,4 +158,7 @@ msgid "Update"
 msgstr ""
 
 msgid "Go to Admin"
+msgstr ""
+
+msgid "You accept <a href=\":terms_link\">terms and agreements</a>"
 msgstr ""

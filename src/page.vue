@@ -29,15 +29,14 @@
 
   export default {
     mounted() {
-      const vm = this;
       this.getPage((data) => {
-        vm.page = data;
-        window.eventHub.$emit('page-title', vm.page.title.rendered);
+        this.page = data;
+        window.eventHub.$emit('page-title', this.page.title.rendered);
         window.eventHub.$emit('track-ga');
       });
 
       this.getMenuLocation('footer', (response) => {
-        vm.menu = response;
+        this.menu = response;
       });
     },
 
